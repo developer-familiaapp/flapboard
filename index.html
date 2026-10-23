@@ -336,6 +336,29 @@ GATE 12`,
   delete S.mode;
   const save = () => store.set(KEY, S);
 
+  // Settings written in the address after # (e.g. #key=...&airport=GIG&size=24x8).
+  // Kiosk browsers forget everything on restart, so these are applied on every load.
+  const HASH_MAP = {key: 'apiKey', airport: 'airport', city: 'city', size: 'size', lang: 'lang', interval: 'interval',
+    refresh: 'depRefresh', temp: 'tempUnit', wind: 'windUnit', label: 'label', speed: 'speed', sound: 'sound',
+    volume: 'volume', align: 'align', source: 'depSource'};
+  try {
+    const hp = new URLSearchParams(location.hash.slice(1));
+    hp.forEach((v, k) => {
+      const f = HASH_MAP[k.toLowerCase()];
+      if (!f) return;
+      if (typeof DEFAULTS[f] === 'number') { const n = Number(v); if (!isNaN(n)) S[f] = n; }
+      else if (typeof DEFAULTS[f] === 'boolean') S[f] = !/^(0|false|off|no)$/i.test(v);
+      else S[f] = v;
+    });
+    if (/^pt/i.test(S.lang)) S.lang = 'pt-BR'; else if (/^en/i.test(S.lang)) S.lang = 'en-US';
+    if (S.tempUnit === 'c') S.tempUnit = 'celsius'; if (S.tempUnit === 'f') S.tempUnit = 'fahrenheit';
+    if (hp.has('show')) {
+      const s = hp.get('show').toLowerCase().split(',');
+      S.showMessages = s.includes('messages'); S.showClock = s.includes('clock');
+      S.showWeather = s.includes('weather'); S.showDepartures = s.includes('departures');
+    }
+  } catch (e) {}
+
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- words on the board ---------- */
