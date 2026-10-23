@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c0b0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flapboard">
+<title>Flapboard Remote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column of panels for a phone, widening to two columns on a computer. Same housing and flap palette as the board. */
+:root{
+  --bg:#0c0b0a; --card:#151412; --well:#0e0d0c; --line:#2e2b27;
+  --ink:#eee6d2; --muted:#968d7e; --accent:#e2a03f; --ok:#6fb27e; --bad:#e0705f;
+  --tile:#1b1a18; --tile-hi:#252321;
+  --c-r:#c63f2c; --c-o:#df7a29; --c-y:#e5b625; --c-g:#3e8c4e; --c-b:#2e6dae; --c-v:#7a4e9f; --c-w:#eee6d2;
+  --f-tile:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-ui:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.45;
+  padding-block:calc(16px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-family:var(--f-tile);font-weight:600;font-size:30px;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+h2{margin:0;font-family:var(--f-tile);font-weight:600;font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.06em;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.pill.on{color:var(--ok);border-color:#2f4a35}.pill.on::before{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.pill.off{color:var(--bad);border-color:#4a2a24}.pill.off::before{background:var(--bad)}
+.sub{margin:0;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:860px){.grid{grid-template-columns:1fr 1fr}.span{grid-column:1/-1}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+label.l,.l{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type=text],input[type=password],input[type=number],input[type=url],select,textarea{
+  font:inherit;font-size:16px;color:var(--ink);background:var(--well);border:1px solid var(--line);border-radius:6px;padding:10px;width:100%;min-width:0}
+textarea{resize:vertical;line-height:1.45;text-transform:uppercase}
+textarea.plain{text-transform:none}
+input:focus-visible,select:focus-visible,textarea:focus-visible,.btn:focus-visible,.check input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.help{margin:0;font-size:12px;color:var(--muted)}
+.help b{color:var(--ink);font-weight:500}
+.btn{font:inherit;font-size:14px;cursor:pointer;border-radius:8px;padding:11px 16px;border:1px solid var(--line);background:var(--well);color:var(--ink);min-height:44px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1307;font-weight:500}
+.btn.danger{color:var(--bad)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions .grow{flex:1}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.check{display:flex;align-items:center;gap:10px;font-size:14px;min-height:32px}
+.check input{accent-color:var(--accent);width:18px;height:18px}
+input[type=range]{accent-color:var(--accent);width:100%}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{width:32px;height:32px;border-radius:6px;border:1px solid var(--line);cursor:pointer;padding:0}
+.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.status{font-size:12px;margin:0;padding:8px 10px;border-radius:6px;background:var(--well);border:1px solid var(--line);color:var(--muted);word-break:break-word}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad);border-color:#4a2a24}
+code,.mono{font-family:var(--f-ui);font-size:12px}
+pre{margin:0;background:var(--well);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;font-size:12px;line-height:1.5}
+ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.linkbox{display:flex;gap:8px;align-items:stretch}
+.linkbox input{font-size:12px;font-family:var(--f-ui)}
+
+/* mini board preview */
+.preview{background:linear-gradient(#171614,#0b0a09);border-radius:8px;padding:8px;box-shadow:inset 0 1px 0 #2d2a26;overflow:hidden}
+.pv{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:2px}
+.pv i{position:relative;aspect-ratio:.64;background:linear-gradient(var(--tile-hi),var(--tile));border-radius:2px;
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-family:var(--f-tile);font-weight:600;color:var(--ink);font-size:var(--pfs);line-height:1;container-type:inline-size}
+.pv i::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#040404}
+.pv i[data-c="r"]{background:var(--c-r)}.pv i[data-c="o"]{background:var(--c-o)}.pv i[data-c="y"]{background:var(--c-y)}
+.pv i[data-c="g"]{background:var(--c-g)}.pv i[data-c="b"]{background:var(--c-b)}.pv i[data-c="v"]{background:var(--c-v)}.pv i[data-c="w"]{background:var(--c-w)}
+.count{font-size:12px;color:var(--muted);text-align:right}
+.count.over{color:var(--bad)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:calc(100% - 32px)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Flapboard Remote</h1>
+    <span class="pill" id="tvPill">Not connected</span>
+  </div>
+  <p class="sub" id="tvNow"></p>
+
+  <!-- ===== setup ===== -->
+  <section id="setup" class="card" hidden>
+    <h2>Connect your board</h2>
+    <p class="help">The phone and the TV talk through a free Firebase database in your Google account. This takes about five minutes, once.</p>
+    <ol class="help">
+      <li>Open <b>console.firebase.google.com</b> and sign in with your Google account. Click <b>Create a project</b>, name it <b>flapboard</b>, turn off Google Analytics, and create it.</li>
+      <li>In the left menu open <b>Build → Realtime Database</b> and click <b>Create Database</b>. Pick a location, choose <b>Start in locked mode</b>, then <b>Enable</b>.</li>
+      <li>Open the <b>Rules</b> tab, replace everything with the rules below, and click <b>Publish</b>.</li>
+      <li>Back on the <b>Data</b> tab, copy the address at the top (it ends in <b>firebaseio.com</b> or <b>firebasedatabase.app</b>) and paste it here.</li>
+    </ol>
+    <div class="field">
+      <span class="l">Database rules</span>
+      <pre id="rules">{
+  "rules": {
+    "boards": {
+      "$board": {
+        ".read": "$board.length >= 24",
+        ".write": "$board.length >= 24"
+      }
+    }
+  }
+}</pre>
+      <div class="actions"><button class="btn" type="button" id="copyRules">Copy rules</button></div>
+    </div>
+    <div class="field">
+      <label class="l" for="dbUrl">Database address</label>
+      <input type="url" id="dbUrl" placeholder="https://flapboard-1234-default-rtdb.firebaseio.com" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <p class="status" id="setupStatus" hidden></p>
+    <div class="actions"><button class="btn primary" type="button" id="connect">Connect</button></div>
+  </section>
+
+  <!-- ===== control ===== -->
+  <div id="app" class="grid" hidden>
+
+    <section class="card span">
+      <h2>Send to the board</h2>
+      <div class="preview"><div class="pv" id="pv"></div></div>
+      <div class="field">
+        <label class="l" for="msg">Message</label>
+        <textarea id="msg" rows="4" spellcheck="false" placeholder="DINNER IS READY"></textarea>
+        <div class="count" id="count"></div>
+      </div>
+      <div class="field">
+        <span class="l">Add a color tile</span>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="l" for="dur">Keep it up for</label>
+          <select id="dur">
+            <option value="1">1 minute</option>
+            <option value="5" selected>5 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="1440">Until I clear it</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="l">&nbsp;</span>
+          <button class="btn primary" type="button" id="send">Send to TV</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn grow" type="button" id="clear">Clear message</button>
+        <button class="btn grow" type="button" id="nextBtn">Next screen</button>
+        <button class="btn grow" type="button" id="reloadBtn">Reload board</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Rotation</h2>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="showMessages"> Messages</label>
+        <label class="check"><input type="checkbox" id="showClock"> Clock</label>
+        <label class="check"><input type="checkbox" id="showWeather"> Weather</label>
+        <label class="check"><input type="checkbox" id="showDepartures"> Departures</label>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="l" for="interval">Seconds per screen</label>
+          <input type="number" id="interval" min="5" max="3600" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label class="l" for="lang">Board language</label>
+          <select id="lang"><option value="en-US">English</option><option value="pt-BR">Português</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="l" for="label">Clock heading</label>
+        <input type="text" id="label" autocomplete="off">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Rotating messages</h2>
+      <div class="field">
+        <label class="l" for="messages">Messages</label>
+        <textarea id="messages" rows="9" spellcheck="false"></textarea>
+        <p class="help">Put <b>---</b> on its own line between messages. Color tiles: {R} {O} {Y} {G} {B} {V} {W}.</p>
+      </div>
+      <div class="actions"><button class="btn primary" type="button" id="saveMessages">Save messages</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Weather</h2>
+      <div class="field">
+        <label class="l" for="city">City</label>
+        <input type="text" id="city" autocomplete="off">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="l" for="tempUnit">Temperature</label>
+          <select id="tempUnit"><option value="celsius">°C</option><option value="fahrenheit">°F</option></select>
+        </div>
+        <div class="field">
+          <label class="l" for="windUnit">Wind</label>
+          <select id="windUnit"><option value="kn">Knots</option><option value="kmh">km/h</option><option value="mph">mph</option></select>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Departures</h2>
+      <div class="field">
+        <label class="l" for="depSource">Source</label>
+        <select id="depSource"><option value="live">Live from AeroDataBox</option><option value="manual">My own list</option></select>
+      </div>
+      <div id="liveBox" class="row">
+        <div class="field">
+          <label class="l" for="airport">Airport code</label>
+          <input type="text" id="airport" maxlength="4" autocomplete="off" autocapitalize="characters">
+        </div>
+        <div class="field">
+          <label class="l" for="depRefresh">Update every (min)</label>
+          <input type="number" id="depRefresh" min="15" max="1440" inputmode="numeric">
+        </div>
+      </div>
+      <div id="keyBox" class="field">
+        <label class="l" for="apiKey">RapidAPI key</label>
+        <input type="password" id="apiKey" autocomplete="off" spellcheck="false">
+      </div>
+      <div id="manualBox" class="field">
+        <label class="l" for="flights">My flights</label>
+        <textarea id="flights" rows="5" spellcheck="false"></textarea>
+        <p class="help">One per line: <b>time, destination, flight, status</b>.</p>
+        <div class="actions"><button class="btn primary" type="button" id="saveFlights">Save flights</button></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Board</h2>
+      <div class="row">
+        <div class="field">
+          <label class="l" for="size">Size</label>
+          <select id="size"><option value="22x6">22 × 6 classic</option><option value="24x8">24 × 8 fills a TV</option><option value="16x5">16 × 5 large letters</option></select>
+        </div>
+        <div class="field">
+          <label class="l" for="align">Message alignment</label>
+          <select id="align"><option value="center">Centered</option><option value="left">Left</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="l" for="speed">Flip speed</label>
+        <input type="range" id="speed" min="40" max="180" step="10">
+      </div>
+      <div class="row">
+        <label class="check"><input type="checkbox" id="sound"> Clatter sound</label>
+        <div class="field">
+          <label class="l" for="volume">Volume</label>
+          <input type="range" id="volume" min="0" max="100" step="5">
+        </div>
+      </div>
+    </section>
+
+    <section class="card span">
+      <h2>Links</h2>
+      <div class="field">
+        <label class="l" for="tvLink">Address for the TV (put this in the kiosk settings)</label>
+        <div class="linkbox"><input type="text" id="tvLink" readonly><button class="btn" type="button" data-copy="tvLink">Copy</button></div>
+      </div>
+      <div class="field">
+        <label class="l" for="meLink">This remote (open on your phone, then Add to Home Screen)</label>
+        <div class="linkbox"><input type="text" id="meLink" readonly><button class="btn" type="button" data-copy="meLink">Copy</button></div>
+      </div>
+      <p class="help">Anyone with these links can control the board, so share them only with people you trust.</p>
+      <div class="actions"><button class="btn danger" type="button" id="forget">Disconnect this device</button></div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  let toastT;
+  function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2200); }
+
+  /* ---------- the same defaults the board uses ---------- */
+  const DEFAULTS = {
+    showMessages: true, showClock: true, showWeather: true, showDepartures: true,
+    interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
+    label: 'LOCAL TIME', lang: 'en-US', city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
+    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: ''
+  };
+
+  /* ---------- connection ---------- */
+  function readConfig() {
+    const hp = new URLSearchParams(location.hash.slice(1));
+    const db = (hp.get('db') || '').trim().replace(/\/+$/, ''), board = (hp.get('board') || '').trim();
+    if (db && board) { const c = {db, board}; store.set('flapboard.remote', c); history.replaceState(null, '', location.pathname + location.search + '#db=' + encodeURIComponent(db) + '&board=' + board); return c; }
+    return store.get('flapboard.remote');
+  }
+  const validDb = u => /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.(firebaseio\.com|firebasedatabase\.app)$/i.test(u);
+  function newId() { const a = new Uint8Array(24); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  let CFG = readConfig();
+  const base = () => `${CFG.db}/boards/${CFG.board}`;
+  async function write(path, body, method = 'PATCH') {
+    const res = await fetch(`${base()}${path}.json`, {method, body: JSON.stringify(body)});
+    if (!res.ok) throw new Error(res.status === 401 ? 'The database refused the change. Check the rules in Firebase.' : `Save failed (HTTP ${res.status}).`);
+  }
+
+  /* ---------- setup ---------- */
+  $('copyRules').addEventListener('click', () => copyText($('rules').textContent, $('rules')));
+  $('connect').addEventListener('click', async () => {
+    const db = $('dbUrl').value.trim().replace(/\/+$/, '');
+    const st = $('setupStatus'); st.hidden = false; st.className = 'status';
+    if (!validDb(db)) { st.textContent = 'That doesn’t look like a Realtime Database address. It should start with https:// and end in firebaseio.com or firebasedatabase.app.'; st.className = 'status bad'; return; }
+    st.textContent = 'Checking…';
+    const board = newId();
+    try {
+      const res = await fetch(`${db}/boards/${board}/status.json`, {method: 'PATCH', body: JSON.stringify({createdAt: {'.sv': 'timestamp'}})});
+      if (res.status === 401) throw new Error('The database refused access. Make sure you published the rules in step 3.');
+      if (res.status === 404) throw new Error('No database at that address. Copy it again from the Data tab.');
+      if (!res.ok) throw new Error(`The database answered with HTTP ${res.status}.`);
+    } catch (e) {
+      st.textContent = e.message && !/fetch/i.test(e.message) ? e.message : 'Could not reach that address. Check it and your internet connection.';
+      st.className = 'status bad'; return;
+    }
+    CFG = {db, board}; store.set('flapboard.remote', CFG);
+    history.replaceState(null, '', location.pathname + '#db=' + encodeURIComponent(db) + '&board=' + board);
+    start();
+    toast('Connected. Put the TV address on the stick next.');
+    setTimeout(() => $('tvLink').scrollIntoView({behavior: 'smooth', block: 'center'}), 400);
+  });
+
+  /* ---------- live data ---------- */
+  let data = {}, es = null, seeded = false;
+  function setAt(obj, path, val) {
+    const parts = String(path).split('/').filter(Boolean);
+    if (!parts.length) return val && typeof val === 'object' ? val : {};
+    let o = obj;
+    for (let i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    if (val === null) delete o[parts[parts.length - 1]]; else o[parts[parts.length - 1]] = val;
+    return obj;
+  }
+  function listen() {
+    if (es) es.close();
+    es = new EventSource(`${base()}.json`);
+    const h = kind => e => {
+      try {
+        const m = JSON.parse(e.data);
+        if (!m || typeof m.path !== 'string') return;
+        if (kind === 'put') data = m.path === '/' ? (m.data && typeof m.data === 'object' ? m.data : {}) : setAt(data, m.path, m.data);
+        else for (const k in (m.data || {})) data = setAt(data, `${m.path}/${k}`, m.data[k]);
+        refresh();
+      } catch (err) {}
+    };
+    es.addEventListener('put', h('put'));
+    es.addEventListener('patch', h('patch'));
+    es.addEventListener('cancel', () => { $('tvPill').className = 'pill off'; $('tvPill').textContent = 'Access refused'; $('tvNow').textContent = 'The database refused access. Check the rules in Firebase.'; });
+  }
+  const settings = () => ({...DEFAULTS, ...(data.settings || {})});
+
+  /* ---------- form ---------- */
+  const FIELDS = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang', 'label', 'city', 'tempUnit', 'windUnit',
+    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights'];
+  const dirty = new Set();
+  function fillForm() {
+    const s = settings();
+    FIELDS.forEach(k => {
+      const el = $(k);
+      if (el === document.activeElement || dirty.has(k)) return;
+      if (el.type === 'checkbox') el.checked = !!s[k]; else el.value = s[k];
+    });
+    const live = s.depSource === 'live';
+    $('liveBox').hidden = !live; $('keyBox').hidden = !live; $('manualBox').hidden = live;
+  }
+  const valueOf = el => el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? Number(el.value) : el.value;
+  async function saveFields(keys, msg) {
+    const body = {};
+    keys.forEach(k => { body[k] = valueOf($(k)); });
+    if ('interval' in body) body.interval = Math.max(5, body.interval || 5);
+    if ('depRefresh' in body) body.depRefresh = Math.max(15, body.depRefresh || 15);
+    if ('airport' in body) body.airport = body.airport.trim().toUpperCase();
+    try { await write('/settings', body); keys.forEach(k => dirty.delete(k)); toast(msg || 'Saved'); }
+    catch (e) { toast(e.message); }
+  }
+  FIELDS.filter(k => k !== 'messages' && k !== 'flights').forEach(k => {
+    $(k).addEventListener('change', () => { saveFields([k]); if (k === 'depSource') { data.settings = {...(data.settings || {}), depSource: $(k).value}; fillForm(); } if (k === 'size' || k === 'align') drawPreview(); });
+  });
+  ['messages', 'flights'].forEach(k => $(k).addEventListener('input', () => dirty.add(k)));
+  $('saveMessages').addEventListener('click', () => saveFields(['messages'], 'Messages saved'));
+  $('saveFlights').addEventListener('click', () => saveFields(['flights'], 'Flights saved'));
+
+  /* ---------- send now ---------- */
+  const rid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  $('send').addEventListener('click', async () => {
+    const text = $('msg').value.trim();
+    if (!text) { toast('Type a message first'); $('msg').focus(); return; }
+    const mins = Number($('dur').value);
+    try { await write('/now', {text, until: Date.now() + mins * 60e3, id: rid()}, 'PUT'); toast('Sent to the TV'); }
+    catch (e) { toast(e.message); }
+  });
+  $('clear').addEventListener('click', async () => {
+    try { await write('/now', {text: '', until: 0, id: rid()}, 'PUT'); toast('Message cleared'); } catch (e) { toast(e.message); }
+  });
+  async function command(action, msg) {
+    try { await write('/command', {action, id: rid(), at: {'.sv': 'timestamp'}}, 'PUT'); toast(msg); } catch (e) { toast(e.message); }
+  }
+  $('nextBtn').addEventListener('click', () => command('next', 'Skipping to the next screen'));
+  $('reloadBtn').addEventListener('click', () => command('reload', 'The board is reloading'));
+
+  /* color tiles */
+  const SW = {R: 'r', O: 'o', Y: 'y', G: 'g', B: 'b', V: 'v', W: 'w'};
+  const SW_NAME = {R: 'red', O: 'orange', Y: 'yellow', G: 'green', B: 'blue', V: 'violet', W: 'white'};
+  Object.keys(SW).forEach(k => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = `var(--c-${SW[k]})`;
+    b.setAttribute('aria-label', `Add a ${SW_NAME[k]} tile`);
+    b.addEventListener('click', () => {
+      const ta = $('msg'), s = ta.selectionStart ?? ta.value.length, e = ta.selectionEnd ?? ta.value.length, ins = `{${k}}`;
+      ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e); ta.focus(); ta.setSelectionRange(s + ins.length, s + ins.length); drawPreview();
+    });
+    $('swatches').appendChild(b);
+  });
+
+  /* ---------- preview (same layout rules as the board) ---------- */
+  const COLOR = {R: '①', O: '②', Y: '③', G: '④', B: '⑤', V: '⑥', W: '⑦'};
+  const CC = {'①': 'r', '②': 'o', '③': 'y', '④': 'g', '⑤': 'b', '⑥': 'v', '⑦': 'w'};
+  const OK = new Set([' ', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$()-+&=;:\'"%,./?°']);
+  let COLS = 22, ROWS = 6, cutoff = false;
+  function cells(str) {
+    const out = []; str = String(str).normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const re = /\{([ROYGBVW])\}|./gi; let m;
+    while ((m = re.exec(str))) {
+      if (m[1]) out.push(COLOR[m[1].toUpperCase()]);
+      else { let ch = m[0].toUpperCase(); if (ch === 'º' || ch === 'ª') ch = '°'; if (ch === '’' || ch === '‘') ch = "'"; if (ch === '“' || ch === '”') ch = '"'; out.push(OK.has(ch) ? ch : ' '); }
+    }
+    return out;
+  }
+  function wrap(arr) {
+    if (arr.length <= COLS) return [arr];
+    const words = []; let w = [];
+    arr.forEach(ch => { if (ch === ' ') { if (w.length) words.push(w); w = []; } else w.push(ch); });
+    if (w.length) words.push(w);
+    const lines = []; let line = [];
+    for (let word of words) {
+      while (word.length > COLS) { if (line.length) { lines.push(line); line = []; } lines.push(word.slice(0, COLS)); word = word.slice(COLS); }
+      if (!word.length) continue;
+      if (!line.length) line = [...word]; else if (line.length + 1 + word.length <= COLS) line.push(' ', ...word); else { lines.push(line); line = [...word]; }
+    }
+    if (line.length) lines.push(line);
+    return lines;
+  }
+  function layout(text, align) {
+    let lines = text.split('\n').map(l => l.trim()).flatMap(l => l === '' ? [[]] : wrap(cells(l)));
+    while (lines.length && !lines[0].length) lines.shift();
+    while (lines.length && !lines[lines.length - 1].length) lines.pop();
+    cutoff = lines.length > ROWS; lines = lines.slice(0, ROWS);
+    const g = Array.from({length: ROWS}, () => Array(COLS).fill(' ')); const top = Math.floor((ROWS - lines.length) / 2);
+    lines.forEach((ln, i) => { const left = align === 'center' ? Math.floor((COLS - ln.length) / 2) : 0; ln.forEach((ch, j) => { g[top + i][left + j] = ch; }); });
+    return g;
+  }
+  function drawPreview() {
+    const s = settings();
+    [COLS, ROWS] = String(s.size || '22x6').split('x').map(Number);
+    const pv = $('pv'); pv.style.setProperty('--cols', COLS);
+    const g = layout($('msg').value || '', s.align);
+    const frag = document.createDocumentFragment();
+    g.flat().forEach(ch => { const i = document.createElement('i'); if (CC[ch]) i.dataset.c = CC[ch]; else i.textContent = ch; frag.appendChild(i); });
+    pv.replaceChildren(frag);
+    const w = pv.clientWidth / COLS; pv.style.setProperty('--pfs', Math.max(6, w / .64 * .74) + 'px');
+    const c = $('count'); c.textContent = cutoff ? `Too long: only ${ROWS} lines fit, the rest is cut off` : `${COLS} letters per line, ${ROWS} lines`; c.className = 'count' + (cutoff ? ' over' : '');
+  }
+  $('msg').addEventListener('input', drawPreview);
+  addEventListener('resize', drawPreview);
+
+  /* ---------- TV status ---------- */
+  function refresh() {
+    fillForm();
+    if (!seeded) { seeded = true; drawPreview(); }
+    tvStatus();
+  }
+  function ago(ms) { const s = Math.round(ms / 1000); if (s < 60) return `${s}s ago`; const m = Math.round(s / 60); if (m < 60) return `${m} min ago`; const h = Math.round(m / 60); return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`; }
+  function tvStatus() {
+    const st = data.status || {}, pill = $('tvPill'), now = $('tvNow');
+    const seen = typeof st.seenAt === 'number' ? st.seenAt : 0;
+    if (!seen) { pill.className = 'pill'; pill.textContent = 'TV not connected yet'; now.textContent = 'Put the TV address from Links on the stick to connect it.'; return; }
+    const age = Date.now() - seen, online = age < 90e3;
+    pill.className = 'pill ' + (online ? 'on' : 'off');
+    pill.textContent = online ? 'TV online' : 'TV offline';
+    now.textContent = online ? `On the TV now: ${st.screen || '…'}` : `Last seen ${ago(age)}${st.screen ? ` showing ${st.screen}` : ''}`;
+  }
+  setInterval(tvStatus, 10e3);
+
+  /* ---------- links ---------- */
+  function copyText(text, fallbackEl) {
+    const done = () => toast('Copied');
+    try { navigator.clipboard.writeText(text).then(done, () => sel(fallbackEl)); } catch (e) { sel(fallbackEl); }
+    function sel(el) { if (el && el.select) { el.focus(); el.select(); } else if (el) { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast('Selected. Press copy on your keyboard.'); }
+  }
+  document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => { const el = $(b.dataset.copy); copyText(el.value, el); }));
+  function links() {
+    const dir = location.origin + location.pathname.replace(/[^/]*$/, '');
+    const h = '#db=' + encodeURIComponent(CFG.db) + '&board=' + CFG.board;
+    $('tvLink').value = dir + h;
+    $('meLink').value = dir + 'control.html' + h;
+  }
+  $('forget').addEventListener('click', () => {
+    if ($('forget').dataset.armed) { store.del('flapboard.remote'); location.href = location.pathname; return; }
+    $('forget').dataset.armed = '1'; $('forget').textContent = 'Tap again to disconnect this device';
+    setTimeout(() => { delete $('forget').dataset.armed; $('forget').textContent = 'Disconnect this device'; }, 4000);
+  });
+
+  /* ---------- start ---------- */
+  function start() {
+    $('setup').hidden = true; $('app').hidden = false;
+    $('tvPill').textContent = 'Connecting…';
+    links(); fillForm(); drawPreview(); listen();
+  }
+  if (CFG && validDb(CFG.db) && CFG.board && CFG.board.length >= 24) start();
+  else { $('setup').hidden = false; drawPreview(); }
+  (document.fonts && document.fonts.ready || Promise.resolve()).then(drawPreview);
+})();
+</script>
+</body>
+</html>

@@ -141,6 +141,11 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     <p class="help">Stays up for one screen interval, then the rotation continues.</p>
   </div>
 
+  <div class="section">
+    <h3>Remote control</h3>
+    <p class="status" id="cloudStatus"></p>
+  </div>
+
   <hr>
 
   <div class="section">
@@ -766,23 +771,26 @@ GATE 12`,
   }
   function playlist() {
     const list = [];
-    if (S.showMessages) parseMessages().forEach(x => list.push(() => layout(x)));
-    if (S.showClock) list.push(clockGrid);
-    if (S.showWeather && S.city.trim()) { list.push(weatherNowGrid); list.push(forecastGrid); }
-    if (S.showDepartures) departurePages().forEach((_, i) => list.push(() => departuresGrid(i)));
-    if (!list.length) list.push(clockGrid);
+    if (S.showMessages) parseMessages().forEach((x, i) => list.push({name: `Message ${i + 1}`, fn: () => layout(x)}));
+    if (S.showClock) list.push({name: 'Clock', fn: clockGrid});
+    if (S.showWeather && S.city.trim()) { list.push({name: 'Weather', fn: weatherNowGrid}); list.push({name: 'Forecast', fn: forecastGrid}); }
+    if (S.showDepartures) departurePages().forEach((_, i, a) => list.push({name: a.length > 1 ? `Departures ${i + 1}` : 'Departures', fn: () => departuresGrid(i)}));
+    if (!list.length) list.push({name: 'Clock', fn: clockGrid});
     return list;
   }
 
   /* ---------- loop ---------- */
-  let list = [], idx = -1, nextAt = 0, override = null;
+  let list = [], idx = -1, nextAt = 0, override = null, currentScreen = '';
   function loop() {
     const now = Date.now();
     if (override && now > override.until) { override = null; nextAt = 0; }
     if (!override && now >= nextAt) {
       list = playlist(); idx = (idx + 1) % list.length; nextAt = now + Math.max(5, S.interval) * 1000;
     }
-    render(override ? override.grid : list[idx % list.length]());
+    const item = list[idx % list.length];
+    const name = override ? (override.name || 'Message sent now') : item.name;
+    if (name !== currentScreen) { currentScreen = name; heartbeat(); }
+    render(override ? override.grid : item.fn());
   }
   function restart() { list = playlist(); idx = -1; nextAt = 0; loop(); }
   function next() { override = null; nextAt = 0; loop(); }
@@ -790,6 +798,100 @@ GATE 12`,
     if (!text.trim()) return;
     override = {grid: layout(text), until: Date.now() + Math.max(5, S.interval) * 1000};
     loop();
+  }
+
+  /* ---------- remote control (Firebase Realtime Database) ---------- */
+  // The address carries #db=<database url>&board=<secret id>. Phone and TV share /boards/<id>.
+  const CLOUD = (() => {
+    try {
+      const hp = new URLSearchParams(location.hash.slice(1));
+      const db = (hp.get('db') || '').trim().replace(/\/+$/, '');
+      const id = (hp.get('board') || '').trim();
+      if (!/^https:\/\/[a-z0-9.-]+$/i.test(db) || id.length < 24 || !/^[A-Za-z0-9_-]+$/.test(id)) return null;
+      return {db, id, base: `${db}/boards/${id}`};
+    } catch (e) { return null; }
+  })();
+  let cloud = {}, cloudFirst = true, lastNowId = null, lastCmdId = null, cloudState = CLOUD ? 'Connecting…' : '';
+  function setAt(obj, path, data) {
+    const parts = String(path).split('/').filter(Boolean);
+    if (!parts.length) return data && typeof data === 'object' ? data : {};
+    let o = obj;
+    for (let i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    const last = parts[parts.length - 1];
+    if (data === null) delete o[last]; else o[last] = data;
+    return obj;
+  }
+  function cloudWrite(path, body, method = 'PATCH') {
+    if (!CLOUD) return Promise.resolve();
+    return fetch(`${CLOUD.base}${path}.json`, {method, body: JSON.stringify(body)}).catch(() => {});
+  }
+  const settingsSig = () => JSON.stringify(Object.keys(DEFAULTS).map(k => S[k]));
+  function applyCloud() {
+    const first = cloudFirst; cloudFirst = false;
+    const cs = cloud.settings && typeof cloud.settings === 'object' ? cloud.settings : {};
+    const before = settingsSig(), sizeBefore = S.size;
+    for (const k in cs) if (k in DEFAULTS && !(k in pendingPush) && typeof cs[k] === typeof DEFAULTS[k]) S[k] = cs[k];
+    if (first) { // fill in anything the cloud doesn't have yet (e.g. the API key from the address)
+      const missing = {};
+      Object.keys(DEFAULTS).forEach(k => { if (!(k in cs)) missing[k] = S[k]; });
+      if (Object.keys(missing).length) cloudWrite('/settings', missing);
+    }
+    if (settingsSig() !== before) {
+      save();
+      if (S.size !== sizeBefore) build();
+      if (!panel.hidden) syncForm();
+      restart(); updateWeather(false); updateDepartures(false);
+    }
+    const n = cloud.now;
+    if (n && n.id && n.id !== lastNowId) {
+      lastNowId = n.id;
+      if (n.text && n.until > Date.now()) { override = {grid: layout(String(n.text)), until: n.until, name: 'Message sent now'}; loop(); }
+      else if (!first && override) { override = null; nextAt = 0; loop(); }
+    }
+    const c = cloud.command;
+    if (c && c.id && c.id !== lastCmdId) {
+      lastCmdId = c.id;
+      if (!first) {
+        if (c.action === 'next') next();
+        else if (c.action === 'reload') location.reload();
+      }
+    }
+  }
+  function connectCloud() {
+    if (!CLOUD || !window.EventSource) return;
+    const es = new EventSource(`${CLOUD.base}.json`);
+    const handle = kind => e => {
+      try {
+        const m = JSON.parse(e.data);
+        if (!m || typeof m.path !== 'string') return;
+        if (kind === 'put') cloud = m.path === '/' ? (m.data && typeof m.data === 'object' ? m.data : {}) : setAt(cloud, m.path, m.data);
+        else for (const k in (m.data || {})) cloud = setAt(cloud, `${m.path}/${k}`, m.data[k]);
+        cloudState = 'Connected'; showCloudStatus();
+        applyCloud();
+      } catch (err) {}
+    };
+    es.addEventListener('put', handle('put'));
+    es.addEventListener('patch', handle('patch'));
+    es.addEventListener('cancel', () => { cloudState = 'The database refused access. Check the rules in Firebase.'; showCloudStatus(); });
+    es.onerror = () => { if (cloudState === 'Connected') { cloudState = 'Reconnecting…'; showCloudStatus(); } };
+  }
+  function heartbeat() {
+    if (!CLOUD) return;
+    cloudWrite('/status', {seenAt: {'.sv': 'timestamp'}, screen: currentScreen, size: S.size});
+  }
+  let pendingPush = {}, pushT;
+  function pushSetting(k) {
+    if (!CLOUD) return;
+    pendingPush[k] = S[k];
+    clearTimeout(pushT);
+    pushT = setTimeout(() => { const body = pendingPush; pendingPush = {}; cloudWrite('/settings', body); }, 800);
+  }
+  function showCloudStatus() {
+    const el = document.getElementById('cloudStatus');
+    if (!el) return;
+    if (!CLOUD) { el.textContent = 'Not set up. Open control.html on your phone or computer to connect this board.'; el.className = 'status'; return; }
+    el.textContent = cloudState;
+    el.className = 'status' + (cloudState === 'Connected' ? ' ok' : /refused/.test(cloudState) ? ' bad' : '');
   }
 
   /* ---------- UI ---------- */
@@ -800,7 +902,8 @@ GATE 12`,
     'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume'];
   function syncSource() { $('liveFields').hidden = S.depSource !== 'live'; $('manualFields').hidden = S.depSource === 'live'; }
   function syncForm() {
-    fields.forEach(k => { const el = $(k); if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k]; });
+    fields.forEach(k => { const el = $(k); if (el === document.activeElement) return; if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k]; });
+    showCloudStatus();
     $('speedOut').textContent = `${S.speed} ms per flip`;
     syncSource(); showBudget();
   }
@@ -813,6 +916,7 @@ GATE 12`,
       if (k === 'depRefresh') S.depRefresh = Math.max(15, S.depRefresh || 15);
       $('speedOut').textContent = `${S.speed} ms per flip`;
       save();
+      pushSetting(k);
       if (k === 'sound' && S.sound) initAudio();
       if (k === 'depSource') syncSource();
       if (k === 'depRefresh') { showBudget(); showDepStatus(); }
@@ -836,6 +940,7 @@ GATE 12`,
   $('reset').addEventListener('click', () => {
     const key = S.apiKey;
     S = {...DEFAULTS, apiKey: key}; save(); syncForm(); build(); restart(); updateWeather(true); updateDepartures(false);
+    if (CLOUD) { const all = {}; Object.keys(DEFAULTS).forEach(k => { all[k] = S[k]; }); cloudWrite('/settings', all); }
     $('resetNote').hidden = false; setTimeout(() => { $('resetNote').hidden = true; }, 2500);
   });
 
@@ -879,6 +984,9 @@ GATE 12`,
   updateWeather(false);
   updateDepartures(false);
   setInterval(() => { updateWeather(false); updateDepartures(false); }, 60e3);
+  connectCloud();
+  heartbeat();
+  setInterval(heartbeat, 30e3);
   (document.fonts && document.fonts.ready || Promise.resolve()).then(fit);
 
   /* over-the-air updates: when a new version is published, announce it on the board and reload */
