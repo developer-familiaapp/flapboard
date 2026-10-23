@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flapboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one fullscreen stage, the split-flap board centered in a dark housing; settings slide in from the right. Single dark look by design. */
+:root{
+  --housing:#0c0b0a;
+  --tile:#1b1a18;
+  --tile-hi:#252321;
+  --ink:#eee6d2;
+  --hinge:#040404;
+  --panel:#161513;
+  --line:#2e2b27;
+  --muted:#968d7e;
+  --accent:#e2a03f;
+  --ok:#6fb27e;
+  --bad:#e0705f;
+  --c-r:#c63f2c; --c-o:#df7a29; --c-y:#e5b625; --c-g:#3e8c4e; --c-b:#2e6dae; --c-v:#7a4e9f; --c-w:#eee6d2;
+  --f-tile:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --f-ui:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0}
+body{background:var(--housing);color:var(--ink);overflow:hidden;font-family:var(--f-ui);font-size:14px}
+body.idle,body.idle *{cursor:none!important}
+
+.stage{height:100%;box-sizing:border-box;display:grid;place-items:center;
+  padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:radial-gradient(ellipse at 50% 40%,#1a1815 0%,var(--housing) 70%)}
+.board{position:relative;display:grid;grid-template-columns:repeat(var(--cols),var(--tw));gap:var(--gap);padding:var(--pad);
+  background:
+    radial-gradient(circle at var(--sx) var(--sx),#3a3631 0 calc(var(--tw)*.07),#0000 calc(var(--tw)*.08)),
+    radial-gradient(circle at calc(100% - var(--sx)) var(--sx),#3a3631 0 calc(var(--tw)*.07),#0000 calc(var(--tw)*.08)),
+    radial-gradient(circle at var(--sx) calc(100% - var(--sx)),#3a3631 0 calc(var(--tw)*.07),#0000 calc(var(--tw)*.08)),
+    radial-gradient(circle at calc(100% - var(--sx)) calc(100% - var(--sx)),#3a3631 0 calc(var(--tw)*.07),#0000 calc(var(--tw)*.08)),
+    linear-gradient(#171614,#0b0a09);
+  border-radius:calc(var(--tw)*.22);
+  box-shadow:inset 0 1px 0 #2d2a26,inset 0 -2px 0 #000,0 0 0 1px #000,0 40px 90px rgba(0,0,0,.65)}
+.plate{position:absolute;left:50%;bottom:calc(var(--pad)*.3);transform:translateX(-50%);
+  font-family:var(--f-ui);font-size:calc(var(--tw)*.17);letter-spacing:.35em;color:#4d4842;white-space:nowrap;text-transform:uppercase}
+
+.tile{position:relative;width:var(--tw);height:var(--th);perspective:calc(var(--th)*5);
+  font-family:var(--f-tile);font-weight:600;font-size:var(--fs);color:var(--ink)}
+.half,.flap{position:absolute;left:0;right:0;height:50%;overflow:hidden}
+.top,.ftop{top:0;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(var(--tile-hi),var(--tile))}
+.bottom,.fbot{bottom:0;border-radius:0 0 var(--r) var(--r);background:linear-gradient(var(--tile),#141311)}
+.half span,.flap span{position:absolute;left:0;right:0;height:200%;display:flex;align-items:center;justify-content:center;line-height:1}
+.top span,.ftop span{top:0}
+.bottom span,.fbot span{top:-100%}
+.half::after,.flap::after{content:"";position:absolute;inset:0;pointer-events:none}
+.top::after,.ftop::after{background:linear-gradient(rgba(255,255,255,.035),rgba(0,0,0,.08))}
+.bottom::after,.fbot::after{background:linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.3))}
+.flap{visibility:hidden;z-index:2;backface-visibility:hidden}
+.ftop{transform-origin:50% 100%}
+.fbot{transform-origin:50% 0;transform:rotateX(90deg)}
+.tile::before{content:"";position:absolute;left:0;right:0;top:50%;height:max(1px,calc(var(--th)*.028));transform:translateY(-50%);background:var(--hinge);z-index:3}
+span[data-c="r"]{background:var(--c-r)} span[data-c="o"]{background:var(--c-o)} span[data-c="y"]{background:var(--c-y)}
+span[data-c="g"]{background:var(--c-g)} span[data-c="b"]{background:var(--c-b)} span[data-c="v"]{background:var(--c-v)}
+span[data-c="w"]{background:var(--c-w)}
+
+/* controls */
+.gear{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(22,21,19,.85);color:var(--muted);
+  display:grid;place-items:center;cursor:pointer;transition:opacity .4s}
+.gear:hover,.gear:focus-visible{color:var(--accent);outline:none;border-color:var(--accent)}
+body.idle .gear{opacity:0;pointer-events:none}
+.hint{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  color:var(--muted);font-size:12px;letter-spacing:.08em;transition:opacity 1s;white-space:nowrap}
+.hint.gone{opacity:0}
+kbd{font-family:var(--f-ui);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--ink)}
+
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);box-sizing:border-box;overflow-y:auto;z-index:10;
+  background:var(--panel);border-left:1px solid var(--line);
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(24px + env(safe-area-inset-bottom,0px));
+  padding-left:20px;padding-right:max(20px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:18px;box-shadow:-30px 0 60px rgba(0,0,0,.5)}
+.panel header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel h2{margin:0;font-family:var(--f-tile);font-weight:600;font-size:26px;letter-spacing:.06em;text-transform:uppercase}
+.panel h3{margin:0;font-family:var(--f-tile);font-weight:600;font-size:19px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.section{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>label,.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel input[type=text],.panel input[type=password],.panel input[type=number],.panel select,.panel textarea{
+  font:inherit;color:var(--ink);background:#0e0d0c;border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;box-sizing:border-box;min-width:0}
+.panel textarea{resize:vertical;min-height:130px;line-height:1.45;text-transform:uppercase}
+.panel input:focus-visible,.panel select:focus-visible,.panel textarea:focus-visible,.btn:focus-visible,.check input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.help{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
+.help a{color:var(--accent)}
+.status{font-size:12px;line-height:1.5;margin:0;padding:8px 10px;border-radius:6px;background:#0e0d0c;border:1px solid var(--line);color:var(--muted)}
+.status.ok{color:var(--ok)} .status.bad{color:var(--bad);border-color:#4a2a24}
+.swatches{display:inline-flex;gap:3px;vertical-align:middle}
+.swatches i{display:inline-block;width:10px;height:14px;border-radius:2px}
+.btn{font:inherit;font-size:13px;cursor:pointer;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:#0e0d0c;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1307;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.inline{display:flex;gap:8px}
+.inline input{flex:1}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+input[type=range]{accent-color:var(--accent);width:100%}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
+@media (prefers-reduced-motion: reduce){ .gear,.hint{transition:none} }
+</style>
+</head>
+<body>
+
+
+<main class="stage" id="stage">
+  <div class="board" id="board" aria-live="polite"></div>
+</main>
+
+<button class="gear" id="gear" type="button" aria-label="Open settings" title="Settings (S)">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+</button>
+<div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound</div>
+
+<aside class="panel" id="panel" hidden aria-label="Board settings">
+  <header>
+    <h2>Board settings</h2>
+    <button class="btn" id="close" type="button">Close</button>
+  </header>
+
+  <div class="field">
+    <label for="now">Show a message now</label>
+    <div class="inline">
+      <input type="text" id="now" placeholder="Type and press Enter" autocomplete="off">
+      <button class="btn primary" id="sendNow" type="button">Show</button>
+    </div>
+    <p class="help">Stays up for one screen interval, then the rotation continues.</p>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Rotation</h3>
+    <div class="checks">
+      <label class="check"><input type="checkbox" id="showMessages"> Messages</label>
+      <label class="check"><input type="checkbox" id="showClock"> Clock</label>
+      <label class="check"><input type="checkbox" id="showWeather"> Weather</label>
+      <label class="check"><input type="checkbox" id="showDepartures"> Departures</label>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="interval">Seconds per screen</label>
+        <input type="number" id="interval" min="5" max="3600" step="1">
+      </div>
+      <div class="field">
+        <label for="lang">Board language</label>
+        <select id="lang">
+          <option value="en-US">English</option>
+          <option value="pt-BR">Português</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Weather</h3>
+    <div class="field">
+      <label for="city">City</label>
+      <input type="text" id="city" autocomplete="off" placeholder="e.g. Rio de Janeiro">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="tempUnit">Temperature</label>
+        <select id="tempUnit"><option value="celsius">°C</option><option value="fahrenheit">°F</option></select>
+      </div>
+      <div class="field">
+        <label for="windUnit">Wind</label>
+        <select id="windUnit"><option value="kn">Knots</option><option value="kmh">km/h</option><option value="mph">mph</option></select>
+      </div>
+    </div>
+    <p class="status" id="wxStatus">Waiting for the first update.</p>
+    <div class="actions"><button class="btn" id="wxRefresh" type="button">Update weather now</button></div>
+    <p class="help">From Open-Meteo, free and with no sign-up. Updates every 15 minutes.</p>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Departures</h3>
+    <div class="field">
+      <label for="depSource">Source</label>
+      <select id="depSource">
+        <option value="live">Live from AeroDataBox</option>
+        <option value="manual">My own list</option>
+      </select>
+    </div>
+    <div id="liveFields" class="section">
+      <div class="row">
+        <div class="field">
+          <label for="airport">Airport code</label>
+          <input type="text" id="airport" autocomplete="off" maxlength="4" placeholder="GIG">
+        </div>
+        <div class="field">
+          <label for="depRefresh">Update every (min)</label>
+          <input type="number" id="depRefresh" min="15" max="1440" step="5">
+        </div>
+      </div>
+      <div class="field">
+        <label for="apiKey">RapidAPI key</label>
+        <input type="password" id="apiKey" autocomplete="off" spellcheck="false" placeholder="Paste your key">
+      </div>
+      <p class="status" id="depStatus">Add a key to start.</p>
+      <div class="actions"><button class="btn" id="depRefreshNow" type="button">Update departures now</button></div>
+      <p class="help" id="budget"></p>
+      <p class="help">Get a free key: sign up at <b>rapidapi.com</b>, open the <b>AeroDataBox</b> API, subscribe to the free Basic plan, then copy the <b>X-RapidAPI-Key</b> shown in its code examples. The key stays in this browser only.</p>
+    </div>
+    <div id="manualFields" class="field">
+      <label for="flights">My flights</label>
+      <textarea id="flights" rows="6" spellcheck="false"></textarea>
+      <p class="help">One flight per line: <b>time, destination, flight, status</b>.</p>
+    </div>
+    <p class="help">Tile colors: <span class="swatches"><i style="background:var(--c-g)"></i></span> on time, <span class="swatches"><i style="background:var(--c-b)"></i></span> boarding, <span class="swatches"><i style="background:var(--c-y)"></i></span> delayed (new time shown), <span class="swatches"><i style="background:var(--c-r)"></i></span> cancelled.</p>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Messages</h3>
+    <div class="field">
+      <label for="messages">Messages</label>
+      <textarea id="messages" rows="9" spellcheck="false"></textarea>
+      <p class="help">Put <b>---</b> on its own line between messages. Long lines wrap on their own. Color tiles:
+        {R} <span class="swatches"><i style="background:var(--c-r)"></i></span>
+        {O} <span class="swatches"><i style="background:var(--c-o)"></i></span>
+        {Y} <span class="swatches"><i style="background:var(--c-y)"></i></span>
+        {G} <span class="swatches"><i style="background:var(--c-g)"></i></span>
+        {B} <span class="swatches"><i style="background:var(--c-b)"></i></span>
+        {V} <span class="swatches"><i style="background:var(--c-v)"></i></span>
+        {W} <span class="swatches"><i style="background:var(--c-w)"></i></span></p>
+    </div>
+    <div class="field">
+      <label for="label">Clock heading</label>
+      <input type="text" id="label" autocomplete="off">
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Board</h3>
+    <div class="row">
+      <div class="field">
+        <label for="size">Board size</label>
+        <select id="size">
+          <option value="22x6">22 × 6 classic</option>
+          <option value="24x8">24 × 8 fills a TV</option>
+          <option value="16x5">16 × 5 large letters</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="align">Message alignment</label>
+        <select id="align">
+          <option value="center">Centered</option>
+          <option value="left">Left</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="speed">Flip speed</label>
+      <input type="range" id="speed" min="40" max="180" step="10">
+      <p class="help" id="speedOut"></p>
+    </div>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="sound"> Clatter sound</label>
+      <div class="field">
+        <label for="volume" class="lbl">Volume</label>
+        <input type="range" id="volume" min="0" max="100" step="5">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="fs" type="button">Go fullscreen</button>
+      <button class="btn" id="next" type="button">Next screen</button>
+      <button class="btn" id="reset" type="button">Restore defaults</button>
+    </div>
+    <p class="help" id="resetNote" hidden>Defaults restored. Your API key was kept.</p>
+  </div>
+</aside>
+
+<script>
+(() => {
+  /* ---------- character set ---------- */
+  const COLOR = {R:'①',O:'②',Y:'③',G:'④',B:'⑤',V:'⑥',W:'⑦'};
+  const COLOR_CLASS = {'①':'r','②':'o','③':'y','④':'g','⑤':'b','⑥':'v','⑦':'w'};
+  const CHARS = [' ', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ...'0123456789', ...'!@#$()-+&=;:\'"%,./?°', ...Object.values(COLOR)];
+  const IDX = new Map(CHARS.map((c, i) => [c, i]));
+
+  /* ---------- storage ---------- */
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  /* ---------- settings ---------- */
+  const KEY = 'flapboard.v1';
+  const DEFAULTS = {
+    showMessages: true, showClock: true, showWeather: true, showDepartures: true,
+    interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
+    label: 'LOCAL TIME', lang: 'en-US',
+    city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
+    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150,
+    messages:
+`{R}{O}{Y}{G}{B}{V}{R}{O}{Y}{G}{B}
+GOOD MORNING
+{V}{B}{G}{Y}{O}{R}{V}{B}{G}{Y}{O}
+---
+CABIN CREW
+PREPARE FOR TAKEOFF
+---
+NOW BOARDING
+ALL ROWS
+GATE 12`,
+    flights:
+`07:15, LISBON, TP088, ON TIME
+08:40, MIAMI, AA930, BOARDING
+09:05, SANTIAGO, LA751, DELAYED
+10:20, MADRID, IB6024, ON TIME
+11:45, PARIS, AF443, CANCELLED`
+  };
+  let S = {...DEFAULTS, ...(store.get(KEY) || {})};
+  delete S.mode;
+  const save = () => store.set(KEY, S);
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- words on the board ---------- */
+  const T = {
+    'en-US': {dep: 'DEPARTURES', fc: 'FORECAST', feels: 'FEELS', wind: 'WIND', calm: 'CALM', hum: 'HUM', hi: 'HI', lo: 'LO', rain: 'RAIN', nodata: 'NO FLIGHTS LISTED', setup: 'ADD API KEY IN SETTINGS', wxwait: 'WEATHER LOADING'},
+    'pt-BR': {dep: 'PARTIDAS', fc: 'PREVISAO', feels: 'SENS', wind: 'VENTO', calm: 'CALMO', hum: 'UMID', hi: 'MAX', lo: 'MIN', rain: 'CHUVA', nodata: 'SEM VOOS NA LISTA', setup: 'ADICIONE A CHAVE DA API', wxwait: 'CARREGANDO TEMPO'}
+  };
+  const t = k => (T[S.lang] || T['en-US'])[k];
+  // WMO weather codes → [English, Portuguese, color]
+  function wmo(code) {
+    const c = Number(code);
+    if (c === 0) return ['CLEAR', 'CEU LIMPO', 'Y'];
+    if (c === 1) return ['MOSTLY CLEAR', 'POUCAS NUVENS', 'Y'];
+    if (c === 2) return ['PARTLY CLOUDY', 'PARC NUBLADO', 'O'];
+    if (c === 3) return ['OVERCAST', 'NUBLADO', 'W'];
+    if (c === 45 || c === 48) return ['FOG', 'NEVOEIRO', 'W'];
+    if (c >= 51 && c <= 57) return ['DRIZZLE', 'GAROA', 'B'];
+    if (c === 61) return ['LIGHT RAIN', 'CHUVA FRACA', 'B'];
+    if (c === 63 || c === 66) return ['RAIN', 'CHUVA', 'B'];
+    if (c === 65 || c === 67) return ['HEAVY RAIN', 'CHUVA FORTE', 'B'];
+    if (c >= 71 && c <= 77) return ['SNOW', 'NEVE', 'W'];
+    if (c >= 80 && c <= 82) return ['SHOWERS', 'PANCADAS', 'B'];
+    if (c === 85 || c === 86) return ['SNOW SHOWERS', 'NEVE', 'W'];
+    if (c >= 95) return ['THUNDERSTORM', 'TROVOADA', 'V'];
+    return ['--', '--', 'W'];
+  }
+  const cond = code => { const w = wmo(code); return {text: S.lang === 'pt-BR' ? w[1] : w[0], color: w[2]}; };
+
+  /* ---------- sound ---------- */
+  let actx = null, noise = null, lastClack = 0;
+  function initAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      const len = Math.floor(actx.sampleRate * 0.025);
+      noise = actx.createBuffer(1, len, actx.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+    } catch (e) { actx = null; }
+  }
+  function clack() {
+    if (!S.sound || !actx || actx.state !== 'running') return;
+    const now = performance.now();
+    if (now - lastClack < 16) return;
+    lastClack = now;
+    const src = actx.createBufferSource(); src.buffer = noise;
+    src.playbackRate.value = 0.8 + Math.random() * 0.5;
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800 + Math.random() * 1400; bp.Q.value = 1.2;
+    const g = actx.createGain(); g.gain.value = (S.volume / 100) * 0.5;
+    src.connect(bp).connect(g).connect(actx.destination); src.start();
+  }
+
+  /* ---------- tiles ---------- */
+  function paint(span, ch) {
+    const c = COLOR_CLASS[ch];
+    if (c) { span.textContent = ''; span.dataset.c = c; }
+    else { span.textContent = ch; delete span.dataset.c; }
+  }
+  class Tile {
+    constructor() {
+      const el = document.createElement('div'); el.className = 'tile';
+      el.innerHTML = '<div class="half top"><span></span></div><div class="half bottom"><span></span></div><div class="flap ftop"><span></span></div><div class="flap fbot"><span></span></div>';
+      this.el = el;
+      [this.topS, this.botS, this.ftopS, this.fbotS] = el.querySelectorAll('span');
+      this.ftop = el.querySelector('.ftop'); this.fbot = el.querySelector('.fbot');
+      this.cur = ' '; this.target = ' '; this.busy = false;
+      [this.topS, this.botS].forEach(s => paint(s, ' '));
+    }
+    set(ch, delay) {
+      if (ch === this.target) return;
+      this.target = ch;
+      if (reduceMotion) { this.cur = ch; paint(this.topS, ch); paint(this.botS, ch); return; }
+      if (!this.busy) { this.busy = true; setTimeout(() => this.run(), delay); }
+    }
+    async run() {
+      while (this.cur !== this.target) {
+        const next = CHARS[(IDX.get(this.cur) + 1) % CHARS.length];
+        await this.flip(next);
+      }
+      this.busy = false;
+    }
+    flip(next) {
+      const d = S.speed;
+      paint(this.topS, next); paint(this.ftopS, this.cur); paint(this.fbotS, next);
+      this.ftop.style.visibility = 'visible'; this.fbot.style.visibility = 'visible';
+      clack();
+      const a1 = this.ftop.animate([{transform: 'rotateX(0deg)'}, {transform: 'rotateX(-90deg)'}], {duration: d / 2, easing: 'ease-in', fill: 'forwards'});
+      const a2 = this.fbot.animate([{transform: 'rotateX(90deg)'}, {transform: 'rotateX(0deg)'}], {duration: d / 2, delay: d / 2, easing: 'cubic-bezier(.3,1.6,.6,1)', fill: 'both'});
+      return a2.finished.catch(() => {}).then(() => {
+        paint(this.botS, next); this.cur = next;
+        this.ftop.style.visibility = 'hidden'; this.fbot.style.visibility = 'hidden';
+        a1.cancel(); a2.cancel();
+      });
+    }
+  }
+
+  /* ---------- board ---------- */
+  const board = document.getElementById('board');
+  const stage = document.getElementById('stage');
+  let ROWS = 6, COLS = 22, tiles = [];
+
+  function build() {
+    [COLS, ROWS] = S.size.split('x').map(Number);
+    board.innerHTML = '';
+    tiles = [];
+    board.style.setProperty('--cols', COLS);
+    for (let i = 0; i < ROWS * COLS; i++) { const tl = new Tile(); tiles.push(tl); board.appendChild(tl.el); }
+    const plate = document.createElement('div'); plate.className = 'plate'; plate.textContent = `Flapboard · ${COLS}×${ROWS}`;
+    board.appendChild(plate);
+    fit();
+  }
+  function fit() {
+    const cs = getComputedStyle(stage);
+    const vw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const vh = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const ratio = 0.64, gapR = 0.09, padR = 0.55;
+    const wf = COLS + (COLS - 1) * gapR + 2 * padR;
+    const hf = ROWS / ratio + (ROWS - 1) * gapR + 2 * padR;
+    const tw = Math.max(4, Math.min(vw / wf, vh / hf));
+    const th = tw / ratio;
+    const st = board.style;
+    st.setProperty('--tw', tw + 'px'); st.setProperty('--th', th + 'px');
+    st.setProperty('--gap', tw * gapR + 'px'); st.setProperty('--pad', tw * padR + 'px');
+    st.setProperty('--sx', tw * padR * 0.45 + 'px');
+    st.setProperty('--fs', th * 0.76 + 'px'); st.setProperty('--r', Math.max(1, tw * 0.06) + 'px');
+  }
+  addEventListener('resize', fit);
+
+  function render(grid) {
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const tl = tiles[r * COLS + c]; const ch = grid[r][c];
+      if (tl.target !== ch) tl.set(ch, c * 18 + r * 30 + Math.random() * 90);
+    }
+  }
+
+  /* ---------- text layout ---------- */
+  function cells(str) {
+    const out = [];
+    str = String(str).normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const re = /\{([ROYGBVW])\}|./gi; let m;
+    while ((m = re.exec(str))) {
+      if (m[1]) out.push(COLOR[m[1].toUpperCase()]);
+      else { let ch = m[0].toUpperCase(); if (ch === 'º' || ch === 'ª') ch = '°'; if (ch === '’' || ch === '‘') ch = "'"; if (ch === '“' || ch === '”') ch = '"'; out.push(IDX.has(ch) ? ch : ' '); }
+    }
+    return out;
+  }
+  function wrap(arr) {
+    if (arr.length <= COLS) return [arr];
+    const words = []; let w = [];
+    arr.forEach(ch => { if (ch === ' ') { if (w.length) words.push(w); w = []; } else w.push(ch); });
+    if (w.length) words.push(w);
+    const lines = []; let line = [];
+    for (let word of words) {
+      while (word.length > COLS) { if (line.length) { lines.push(line); line = []; } lines.push(word.slice(0, COLS)); word = word.slice(COLS); }
+      if (!word.length) continue;
+      if (!line.length) line = [...word];
+      else if (line.length + 1 + word.length <= COLS) line.push(' ', ...word);
+      else { lines.push(line); line = [...word]; }
+    }
+    if (line.length) lines.push(line);
+    return lines;
+  }
+  function blank() { return Array.from({length: ROWS}, () => Array(COLS).fill(' ')); }
+  function layout(text, align = S.align) {
+    let lines = text.split('\n').map(l => l.trim()).flatMap(l => l === '' ? [[]] : wrap(cells(l)));
+    while (lines.length && !lines[0].length) lines.shift();
+    while (lines.length && !lines[lines.length - 1].length) lines.pop();
+    lines = lines.slice(0, ROWS);
+    const g = blank(); const top = Math.floor((ROWS - lines.length) / 2);
+    lines.forEach((ln, i) => {
+      const left = align === 'center' ? Math.floor((COLS - ln.length) / 2) : 0;
+      ln.forEach((ch, j) => { g[top + i][left + j] = ch; });
+    });
+    return g;
+  }
+  function putRow(g, r, arr, start = 0) { if (r < 0 || r >= ROWS) return; arr.forEach((ch, j) => { if (start + j < COLS && start + j >= 0) g[r][start + j] = ch; }); }
+  const pad = (s, n) => { const a = cells(s).slice(0, n); while (a.length < n) a.push(' '); return a; };
+  const hhmm = d => d.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', hour12: false});
+  const clockStr = ms => ms ? new Date(ms).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
+  function header(text) { // title left, current time right
+    const g = blank();
+    putRow(g, 0, cells(text).slice(0, COLS - 6));
+    putRow(g, 0, cells(hhmm(new Date())), COLS - 5);
+    return g;
+  }
+
+  /* ---------- network ---------- */
+  async function getJSON(url, opts = {}) {
+    const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 15000);
+    let res;
+    try { res = await fetch(url, {...opts, signal: ac.signal}); }
+    catch (e) {
+      const err = new Error(location.protocol === 'file:'
+        ? 'Could not reach the service. Check the PC’s internet connection.'
+        : 'Could not reach the service. Live data works when the board runs from the downloaded file; this preview blocks outside connections.');
+      err.network = true; throw err;
+    } finally { clearTimeout(to); }
+    if (!res.ok) { const err = new Error(`HTTP ${res.status}`); err.status = res.status; throw err; }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+  function setStatus(id, text, kind) { const el = document.getElementById(id); el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : ''); }
+
+  /* ---------- weather (Open-Meteo) ---------- */
+  let WX = store.get('flapboard.wx'); // {city, fetchedAt, data}
+  let wxBusy = false;
+  async function geocode(name) {
+    const lang = S.lang === 'pt-BR' ? 'pt' : 'en';
+    const j = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?count=1&format=json&language=${lang}&name=${encodeURIComponent(name)}`);
+    const r = j && j.results && j.results[0];
+    if (!r) throw new Error(`No place called “${name}” was found. Try adding the country.`);
+    return {lat: r.latitude, lon: r.longitude, name: r.name, country: r.country || ''};
+  }
+  async function updateWeather(force) {
+    if (!S.city.trim() || wxBusy) return;
+    const key = `${S.city.trim().toLowerCase()}|${S.tempUnit}|${S.windUnit}`;
+    if (!force && WX && WX.key === key && Date.now() - WX.fetchedAt < 15 * 60e3) { showWxStatus(); return; }
+    wxBusy = true;
+    setStatus('wxStatus', 'Updating…');
+    try {
+      let geo = S.geo && S.geo.q === S.city.trim().toLowerCase() ? S.geo : null;
+      if (!geo) { geo = {...await geocode(S.city.trim()), q: S.city.trim().toLowerCase()}; S.geo = geo; save(); }
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}`
+        + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl`
+        + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`
+        + `&timezone=auto&forecast_days=6&temperature_unit=${S.tempUnit}&wind_speed_unit=${S.windUnit}`;
+      const data = await getJSON(url);
+      WX = {key, fetchedAt: Date.now(), geo, data};
+      store.set('flapboard.wx', WX);
+      showWxStatus();
+    } catch (e) {
+      setStatus('wxStatus', e.message, 'bad');
+    } finally { wxBusy = false; }
+  }
+  function showWxStatus() {
+    if (!WX) return;
+    setStatus('wxStatus', `${WX.geo.name}${WX.geo.country ? ', ' + WX.geo.country : ''} · updated ${clockStr(WX.fetchedAt)}`, 'ok');
+  }
+  const deg = v => `${Math.round(v)}°`;
+  function windText(dir, spd) {
+    const s = Math.round(spd);
+    if (s < 1) return `${t('wind')} ${t('calm')}`;
+    const d = String(Math.round(dir / 10) * 10 || 360).padStart(3, '0');
+    if (S.windUnit === 'kn') return `${t('wind')} ${d}/${String(s).padStart(2, '0')}KT`;
+    return `${t('wind')} ${d}° ${s} ${S.windUnit === 'mph' ? 'MPH' : 'KM/H'}`;
+  }
+  function weatherNowGrid() {
+    if (!WX || !WX.data || !WX.data.current) return layout(`${S.city}\n\n${t('wxwait')}`, 'center');
+    const c = WX.data.current, d = WX.data.daily || {};
+    const cd = cond(c.weather_code);
+    const g = blank();
+    const lines = [
+      [...cells(WX.geo.name).slice(0, COLS - 2)],
+      cells(cd.text),
+      cells(`${deg(c.temperature_2m)}  ${t('feels')} ${deg(c.apparent_temperature)}`),
+      cells(windText(c.wind_direction_10m, c.wind_speed_10m)),
+      cells(`${t('hum')} ${Math.round(c.relative_humidity_2m)}%  QNH ${Math.round(c.pressure_msl)}`),
+      d.temperature_2m_max ? cells(`${t('hi')} ${deg(d.temperature_2m_max[0])} ${t('lo')} ${deg(d.temperature_2m_min[0])} ${t('rain')} ${d.precipitation_probability_max[0] ?? 0}%`) : []
+    ];
+    const keep = ROWS >= 6 ? lines : [lines[0], lines[1], lines[2], lines[3], lines[5]].slice(0, ROWS);
+    const top = Math.max(0, Math.floor((ROWS - keep.length) / 2));
+    keep.forEach((ln, i) => putRow(g, top + i, ln.slice(0, COLS)));
+    g[top][COLS - 1] = COLOR[cd.color];
+    return g;
+  }
+  function forecastGrid() {
+    if (!WX || !WX.data || !WX.data.daily) return layout(`${S.city}\n\n${t('wxwait')}`, 'center');
+    const d = WX.data.daily;
+    const g = header(t('fc'));
+    const condW = COLS - 12;
+    for (let i = 1; i < ROWS && i < d.time.length; i++) {
+      const date = new Date(d.time[i] + 'T12:00:00');
+      const day = date.toLocaleDateString(S.lang, {weekday: 'short'}).replace('.', '').slice(0, 3);
+      const cd = cond(d.weather_code[i]);
+      const temps = `${Math.round(d.temperature_2m_max[i])}/${Math.round(d.temperature_2m_min[i])}`;
+      const row = [...pad(day, 3), ' ', COLOR[cd.color], ' ', ...pad(cd.text, condW), ' ', ...cells(temps.padStart(5).slice(-5))];
+      putRow(g, i, row);
+    }
+    return g;
+  }
+
+  /* ---------- departures (AeroDataBox via RapidAPI) ---------- */
+  let DEP = store.get('flapboard.dep'); // {airport, fetchedAt, flights:[...]}
+  let depBusy = false;
+  const ACTIVE_GONE = /^(departed|enroute|approaching|arrived|landed|diverted)/i;
+  function normalizeFlights(j) {
+    const list = (j && (j.departures || j)) || [];
+    if (!Array.isArray(list)) return [];
+    return list.map(f => {
+      const dep = f.departure || f.movement || {};
+      const dest = (f.arrival && f.arrival.airport) || (f.movement && f.movement.airport) || {};
+      const sched = dep.scheduledTime || dep.scheduledTimeLocal || {};
+      const rev = dep.revisedTime || {};
+      const toMs = v => { if (!v) return null; const ms = Date.parse(String(v).replace(' ', 'T')); return isNaN(ms) ? null : ms; };
+      const localHHMM = v => { const m = String(v || '').match(/(\d{2}):(\d{2})/); return m ? `${m[1]}:${m[2]}` : ''; };
+      return {
+        num: String(f.number || '').replace(/\s+/g, ''),
+        status: String(f.status || ''),
+        dest: dest.municipalityName || dest.shortName || dest.name || dest.iata || dest.icao || '',
+        sched: toMs(sched.utc) ?? toMs(sched.local),
+        rev: toMs(rev.utc) ?? toMs(rev.local),
+        schedLocal: localHHMM(sched.local),
+        revLocal: localHHMM(rev.local),
+        gate: dep.gate || ''
+      };
+    }).filter(f => f.num && f.sched);
+  }
+  async function updateDepartures(force) {
+    if (S.depSource !== 'live' || depBusy) return;
+    const code = S.airport.trim().toUpperCase();
+    if (!S.apiKey.trim()) { setStatus('depStatus', 'Add your RapidAPI key to show live departures.'); return; }
+    if (!/^[A-Z0-9]{3,4}$/.test(code)) { setStatus('depStatus', 'Enter a 3-letter IATA or 4-letter ICAO airport code.', 'bad'); return; }
+    const fresh = DEP && DEP.airport === code && Date.now() - DEP.fetchedAt < S.depRefresh * 60e3;
+    if (!force && fresh) { showDepStatus(); return; }
+    depBusy = true;
+    setStatus('depStatus', 'Updating…');
+    try {
+      const type = code.length === 4 ? 'icao' : 'iata';
+      const url = `https://aerodatabox.p.rapidapi.com/flights/airports/${type}/${code}?offsetMinutes=-20&durationMinutes=720`
+        + `&withLeg=true&direction=Departure&withCancelled=true&withCodeshared=false&withCargo=false&withPrivate=false&withLocation=false`;
+      const j = await getJSON(url, {headers: {'X-RapidAPI-Key': S.apiKey.trim(), 'X-RapidAPI-Host': 'aerodatabox.p.rapidapi.com'}});
+      DEP = {airport: code, fetchedAt: Date.now(), flights: normalizeFlights(j)};
+      store.set('flapboard.dep', DEP);
+      showDepStatus();
+    } catch (e) {
+      let msg = e.message;
+      if (e.status === 401 || e.status === 403) msg = 'RapidAPI refused the key. Check that it was copied in full and that you subscribed to AeroDataBox’s Basic plan.';
+      else if (e.status === 429) msg = 'This month’s free lookups are used up, or requests came too fast. Raise “Update every” or wait.';
+      else if (e.status === 400 || e.status === 404) msg = `AeroDataBox doesn’t recognise airport ${code}.`;
+      setStatus('depStatus', msg + (DEP && DEP.airport === code ? ` Showing the list from ${clockStr(DEP.fetchedAt)}.` : ''), 'bad');
+    } finally { depBusy = false; }
+  }
+  function showDepStatus() {
+    if (!DEP) return;
+    const next = DEP.fetchedAt + S.depRefresh * 60e3;
+    setStatus('depStatus', `${DEP.airport} · ${DEP.flights.length} departures · updated ${clockStr(DEP.fetchedAt)}, next ${clockStr(next)}`, 'ok');
+  }
+  function showBudget() {
+    const perMonth = Math.round(30 * 24 * 60 / Math.max(15, S.depRefresh));
+    document.getElementById('budget').textContent =
+      `About ${perMonth} lookups a month at this rate (${perMonth * 2} API units). The free Basic plan allows roughly 300 lookups; keep this at 150 minutes or more to stay inside it.`;
+  }
+  function liveRows() {
+    if (!DEP || DEP.airport !== S.airport.trim().toUpperCase()) return null;
+    const now = Date.now();
+    return DEP.flights
+      .filter(f => !ACTIVE_GONE.test(f.status) && (f.rev || f.sched) > now - 5 * 60e3)
+      .sort((a, b) => a.sched - b.sched)
+      .map(f => {
+        const st = f.status.toLowerCase();
+        let color = 'G';
+        if (st.startsWith('cancel')) color = 'R';
+        else if (st.startsWith('boarding') || st.startsWith('gateclosed')) color = 'B';
+        else if (st.startsWith('delayed') || (f.rev && f.rev - f.sched > 10 * 60e3)) color = 'Y';
+        const time = color === 'Y' && f.revLocal ? f.revLocal : (f.schedLocal || hhmm(new Date(f.sched)));
+        return {time, dest: f.dest, num: f.num, color};
+      });
+  }
+  function manualRows() {
+    return S.flights.split('\n').map(l => l.split(',').map(s => s.trim())).filter(p => p.length >= 2 && p[0]).map(p => {
+      const s = (p[3] || '').toUpperCase();
+      let color = 'G';
+      if (/^[ROYGBVW]$/.test(s)) color = s;
+      else if (s.startsWith('CANC')) color = 'R';
+      else if (s.startsWith('DELAY') || s.startsWith('ATRAS')) color = 'Y';
+      else if (s.startsWith('BOARD') || s.startsWith('EMBAR')) color = 'B';
+      return {time: p[0], dest: p[1] || '', num: p[2] || '', color};
+    });
+  }
+  function departureRows() { return S.depSource === 'live' ? liveRows() : manualRows(); }
+  function departurePages() {
+    const rows = departureRows();
+    if (!rows || !rows.length) return [[]];
+    const per = ROWS - 1, pages = [];
+    for (let i = 0; i < rows.length && pages.length < 3; i += per) pages.push(rows.slice(i, i + per));
+    return pages;
+  }
+  function departuresGrid(page) {
+    const title = S.depSource === 'live' ? `${t('dep')} ${S.airport.trim().toUpperCase()}` : t('dep');
+    const g = header(title);
+    const rows = departurePages()[page];
+    if (!rows || !rows.length) {
+      const msg = S.depSource === 'live' && !S.apiKey.trim() ? t('setup') : t('nodata');
+      wrap(cells(msg)).forEach((ln, i) => putRow(g, Math.floor(ROWS / 2) + i, ln, Math.floor((COLS - ln.length) / 2)));
+      return g;
+    }
+    const destW = COLS - 14;
+    rows.forEach((f, i) => putRow(g, i + 1, [...pad(f.time, 5), ' ', ...pad(f.dest, destW), ' ', ...pad(f.num, 6), COLOR[f.color]]));
+    return g;
+  }
+
+  /* ---------- screens ---------- */
+  function parseMessages() { return S.messages.split(/^\s*-{3,}\s*$/m).map(x => x.trim()).filter(Boolean); }
+  function clockGrid() {
+    const d = new Date();
+    const wd = d.toLocaleDateString(S.lang, {weekday: 'long'});
+    const dt = d.toLocaleDateString(S.lang, {day: 'numeric', month: 'long', year: 'numeric'}).replace(/ de /g, ' ');
+    const text = ROWS < 6 ? [S.label || '', hhmm(d), wd, dt].join('\n') : [S.label || '', '', hhmm(d), '', wd, dt].join('\n');
+    return layout(text, 'center');
+  }
+  function playlist() {
+    const list = [];
+    if (S.showMessages) parseMessages().forEach(x => list.push(() => layout(x)));
+    if (S.showClock) list.push(clockGrid);
+    if (S.showWeather && S.city.trim()) { list.push(weatherNowGrid); list.push(forecastGrid); }
+    if (S.showDepartures) departurePages().forEach((_, i) => list.push(() => departuresGrid(i)));
+    if (!list.length) list.push(clockGrid);
+    return list;
+  }
+
+  /* ---------- loop ---------- */
+  let list = [], idx = -1, nextAt = 0, override = null;
+  function loop() {
+    const now = Date.now();
+    if (override && now > override.until) { override = null; nextAt = 0; }
+    if (!override && now >= nextAt) {
+      list = playlist(); idx = (idx + 1) % list.length; nextAt = now + Math.max(5, S.interval) * 1000;
+    }
+    render(override ? override.grid : list[idx % list.length]());
+  }
+  function restart() { list = playlist(); idx = -1; nextAt = 0; loop(); }
+  function next() { override = null; nextAt = 0; loop(); }
+  function showNow(text) {
+    if (!text.trim()) return;
+    override = {grid: layout(text), until: Date.now() + Math.max(5, S.interval) * 1000};
+    loop();
+  }
+
+  /* ---------- UI ---------- */
+  const $ = id => document.getElementById(id);
+  const panel = $('panel');
+  const fields = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang',
+    'city', 'tempUnit', 'windUnit', 'depSource', 'airport', 'depRefresh', 'apiKey', 'flights',
+    'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume'];
+  function syncSource() { $('liveFields').hidden = S.depSource !== 'live'; $('manualFields').hidden = S.depSource === 'live'; }
+  function syncForm() {
+    fields.forEach(k => { const el = $(k); if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k]; });
+    $('speedOut').textContent = `${S.speed} ms per flip`;
+    syncSource(); showBudget();
+  }
+  let debounce, netDebounce;
+  fields.forEach(k => {
+    $(k).addEventListener('input', () => {
+      const el = $(k);
+      S[k] = el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? Number(el.value) : el.value;
+      if (k === 'interval') S.interval = Math.max(5, S.interval || 5);
+      if (k === 'depRefresh') S.depRefresh = Math.max(15, S.depRefresh || 15);
+      $('speedOut').textContent = `${S.speed} ms per flip`;
+      save();
+      if (k === 'sound' && S.sound) initAudio();
+      if (k === 'depSource') syncSource();
+      if (k === 'depRefresh') { showBudget(); showDepStatus(); }
+      if (k === 'size') { build(); restart(); return; }
+      if (['speed', 'volume', 'sound'].includes(k)) return;
+      if (['city', 'tempUnit', 'windUnit', 'lang'].includes(k)) { clearTimeout(netDebounce); netDebounce = setTimeout(() => updateWeather(true), 1200); }
+      if (['airport', 'apiKey', 'depSource'].includes(k)) { clearTimeout(netDebounce); netDebounce = setTimeout(() => updateDepartures(false), 1200); }
+      clearTimeout(debounce); debounce = setTimeout(restart, 500);
+    });
+  });
+  function openPanel() { panel.hidden = false; syncForm(); showWxStatus(); showDepStatus(); $('now').focus(); }
+  function closePanel() { panel.hidden = true; $('gear').focus({preventScroll: true}); }
+  $('gear').addEventListener('click', openPanel);
+  $('close').addEventListener('click', closePanel);
+  $('sendNow').addEventListener('click', () => { showNow($('now').value); $('now').value = ''; });
+  $('now').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); showNow($('now').value); $('now').value = ''; } });
+  $('next').addEventListener('click', next);
+  $('fs').addEventListener('click', toggleFs);
+  $('wxRefresh').addEventListener('click', () => updateWeather(true).then(restart));
+  $('depRefreshNow').addEventListener('click', () => updateDepartures(true).then(restart));
+  $('reset').addEventListener('click', () => {
+    const key = S.apiKey;
+    S = {...DEFAULTS, apiKey: key}; save(); syncForm(); build(); restart(); updateWeather(true); updateDepartures(false);
+    $('resetNote').hidden = false; setTimeout(() => { $('resetNote').hidden = true; }, 2500);
+  });
+
+  function toggleFs() {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else document.documentElement.requestFullscreen().catch(() => {});
+    } catch (e) {}
+  }
+
+  addEventListener('keydown', e => {
+    initAudio();
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+    if (e.key === 'Escape' && !panel.hidden) { closePanel(); return; }
+    if (typing) return;
+    const k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); panel.hidden ? openPanel() : closePanel(); }
+    else if (k === 'f') toggleFs();
+    else if (k === ' ') { e.preventDefault(); next(); }
+    else if (k === 'm') { S.sound = !S.sound; save(); syncForm(); }
+  });
+  addEventListener('pointerdown', initAudio);
+
+  /* idle cursor + hint */
+  let idleT;
+  function wake() { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (panel.hidden) document.body.classList.add('idle'); }, 3000); }
+  ['mousemove', 'pointerdown', 'keydown'].forEach(ev => addEventListener(ev, wake));
+  wake();
+  setTimeout(() => $('hint').classList.add('gone'), 7000);
+
+  /* keep the TV awake */
+  async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') await navigator.wakeLock.request('screen'); } catch (e) {} }
+  document.addEventListener('visibilitychange', keepAwake);
+  keepAwake();
+
+  /* start */
+  syncForm();
+  build();
+  restart();
+  setInterval(loop, 1000);
+  updateWeather(false);
+  updateDepartures(false);
+  setInterval(() => { updateWeather(false); updateDepartures(false); }, 60e3);
+  (document.fonts && document.fonts.ready || Promise.resolve()).then(fit);
+})();
+</script>
+
+</body>
+</html>
