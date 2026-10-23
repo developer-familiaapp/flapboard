@@ -315,7 +315,12 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
     depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150,
     messages:
-`{R}{O}{Y}{G}{B}{V}{R}{O}{Y}{G}{B}
+`{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}
+UPDATE RECEIVED
+OVER THE AIR
+{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}
+---
+{R}{O}{Y}{G}{B}{V}{R}{O}{Y}{G}{B}
 GOOD MORNING
 {V}{B}{G}{Y}{O}{R}{V}{B}{G}{Y}{O}
 ---
@@ -466,7 +471,7 @@ GATE 12`,
     tiles = [];
     board.style.setProperty('--cols', COLS);
     for (let i = 0; i < ROWS * COLS; i++) { const tl = new Tile(); tiles.push(tl); board.appendChild(tl.el); }
-    const plate = document.createElement('div'); plate.className = 'plate'; plate.textContent = `Flapboard · ${COLS}×${ROWS}`;
+    const plate = document.createElement('div'); plate.className = 'plate'; plate.textContent = `Flapboard · Mk II · ${COLS}×${ROWS}`;
     board.appendChild(plate);
     fit();
   }
@@ -875,6 +880,29 @@ GATE 12`,
   updateDepartures(false);
   setInterval(() => { updateWeather(false); updateDepartures(false); }, 60e3);
   (document.fonts && document.fonts.ready || Promise.resolve()).then(fit);
+
+  /* over-the-air updates: when a new version is published, announce it on the board and reload */
+  if (/^https?:$/.test(location.protocol) && !/claude/i.test(location.hostname)) {
+    let baseline = null, reloading = false;
+    const sig = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
+    async function checkUpdate() {
+      if (reloading) return;
+      try {
+        const res = await fetch(location.pathname + '?v=' + Date.now(), {cache: 'no-store'});
+        if (!res.ok) return;
+        const h = sig(await res.text());
+        if (baseline === null) { baseline = h; return; }
+        if (h !== baseline && panel.hidden) {
+          reloading = true;
+          override = {grid: layout(S.lang === 'pt-BR' ? 'NOVA VERSAO\nCARREGANDO' : 'NEW VERSION\nLOADING', 'center'), until: Date.now() + 60e3};
+          loop();
+          setTimeout(() => location.reload(), 9000);
+        }
+      } catch (e) {}
+    }
+    checkUpdate();
+    setInterval(checkUpdate, 5 * 60e3);
+  }
 })();
 </script>
 
