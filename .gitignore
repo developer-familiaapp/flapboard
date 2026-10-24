@@ -1,0 +1,5 @@
+# Private keys and links. Never upload these.
+.env
+.env.*
+!.env.example
+.DS_Store
