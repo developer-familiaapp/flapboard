@@ -213,6 +213,8 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
           <select id="windUnit"><option value="kn">Knots</option><option value="kmh">km/h</option><option value="mph">mph</option></select>
         </div>
       </div>
+      <p class="status" id="wxReport">Waiting for the TV to report.</p>
+      <p class="help">From Open-Meteo, free with no key. The TV updates it every 15 minutes.</p>
     </section>
 
     <section class="card">
@@ -234,7 +236,10 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
       <div id="keyBox" class="field">
         <label class="l" for="apiKey">RapidAPI key</label>
         <input type="password" id="apiKey" autocomplete="off" spellcheck="false">
+        <p class="help">Free key: sign up at <b>rapidapi.com</b>, search for <b>AeroDataBox</b>, open <b>Pricing</b> and subscribe to the free <b>Basic</b> plan. Then copy the <b>X-RapidAPI-Key</b> value from its code examples and paste it here.</p>
       </div>
+      <p class="status" id="depReport">Waiting for the TV to report.</p>
+      <div class="actions"><button class="btn" type="button" id="refreshData">Update weather and flights now</button></div>
       <div id="manualBox" class="field">
         <label class="l" for="flights">My flights</label>
         <textarea id="flights" rows="5" spellcheck="false"></textarea>
@@ -420,6 +425,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
   }
   $('nextBtn').addEventListener('click', () => command('next', 'Skipping to the next screen'));
   $('reloadBtn').addEventListener('click', () => command('reload', 'The board is reloading'));
+  $('refreshData').addEventListener('click', () => command('refreshData', 'The TV is updating weather and flights'));
 
   /* color tiles */
   const SW = {R: 'r', O: 'o', Y: 'y', G: 'g', B: 'b', V: 'v', W: 'w'};
@@ -492,8 +498,15 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     tvStatus();
   }
   function ago(ms) { const s = Math.round(ms / 1000); if (s < 60) return `${s}s ago`; const m = Math.round(s / 60); if (m < 60) return `${m} min ago`; const h = Math.round(m / 60); return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`; }
+  function report(elId, r) {
+    const el = $(elId);
+    if (!r || !r.text) { el.textContent = 'Waiting for the TV to report.'; el.className = 'status'; return; }
+    el.textContent = `TV says: ${r.text}`;
+    el.className = 'status' + (r.kind ? ' ' + r.kind : '');
+  }
   function tvStatus() {
     const st = data.status || {}, pill = $('tvPill'), now = $('tvNow');
+    report('wxReport', st.weather); report('depReport', st.departures);
     const seen = typeof st.seenAt === 'number' ? st.seenAt : 0;
     if (!seen) { pill.className = 'pill'; pill.textContent = 'TV not connected yet'; now.textContent = 'Put the TV address from Links on the stick to connect it.'; return; }
     const age = Date.now() - seen, online = age < 90e3;

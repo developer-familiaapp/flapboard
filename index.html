@@ -561,16 +561,26 @@ GATE 12`,
     let res;
     try { res = await fetch(url, {...opts, signal: ac.signal}); }
     catch (e) {
-      const err = new Error(location.protocol === 'file:'
-        ? 'Could not reach the service. Check the PC’s internet connection.'
-        : 'Could not reach the service. Live data works when the board runs from the downloaded file; this preview blocks outside connections.');
+      const err = new Error(/claude/i.test(location.hostname)
+        ? 'Could not reach the service. This preview blocks outside connections; live data works on the TV.'
+        : 'Could not reach the service. Check the stick’s internet connection.');
       err.network = true; throw err;
     } finally { clearTimeout(to); }
     if (!res.ok) { const err = new Error(`HTTP ${res.status}`); err.status = res.status; throw err; }
     if (res.status === 204) return null;
     return res.json();
   }
-  function setStatus(id, text, kind) { const el = document.getElementById(id); el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : ''); }
+  function setStatus(id, text, kind) {
+    const el = document.getElementById(id); el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : '');
+    if (text !== 'Updating…') reportStatus(id, text, kind || '');
+  }
+  const reported = {};
+  function reportStatus(id, text, kind) { // show the TV's weather/departures status on the remote
+    const key = id === 'wxStatus' ? 'weather' : id === 'depStatus' ? 'departures' : null;
+    if (!key || reported[key] === text) return;
+    reported[key] = text;
+    try { cloudWrite('/status', {[key]: {text, kind, at: {'.sv': 'timestamp'}}}); } catch (e) {}
+  }
 
   /* ---------- weather (Open-Meteo) ---------- */
   let WX = store.get('flapboard.wx'); // {city, fetchedAt, data}
@@ -854,6 +864,7 @@ GATE 12`,
       if (!first) {
         if (c.action === 'next') next();
         else if (c.action === 'reload') location.reload();
+        else if (c.action === 'refreshData') { updateWeather(true).then(restart); updateDepartures(true).then(restart); }
       }
     }
   }
