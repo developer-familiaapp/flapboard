@@ -160,6 +160,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
         <button class="btn grow" type="button" id="clear">Clear message</button>
         <button class="btn grow" type="button" id="nextBtn">Next screen</button>
         <button class="btn grow" type="button" id="reloadBtn">Reload board</button>
+        <button class="btn grow" type="button" id="haBtn">Open Home Assistant on TV</button>
       </div>
     </section>
 
@@ -249,6 +250,15 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     </section>
 
     <section class="card">
+      <h2>Home Assistant</h2>
+      <div class="field">
+        <label class="l" for="haUrl">Home Assistant address</label>
+        <input type="url" id="haUrl" autocomplete="off" placeholder="https://…">
+      </div>
+      <p class="help">Shows a house button on the board (and the H key). Use the TV remote's Back button to return to the board.</p>
+    </section>
+
+    <section class="card">
       <h2>Board</h2>
       <div class="row">
         <div class="field">
@@ -306,7 +316,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     showMessages: true, showClock: true, showWeather: true, showDepartures: true,
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US', city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: ''
+    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: ''
   };
 
   /* ---------- connection ---------- */
@@ -379,7 +389,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
 
   /* ---------- form ---------- */
   const FIELDS = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang', 'label', 'city', 'tempUnit', 'windUnit',
-    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights'];
+    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights', 'haUrl'];
   const dirty = new Set();
   function fillForm() {
     const s = settings();
@@ -425,6 +435,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
   }
   $('nextBtn').addEventListener('click', () => command('next', 'Skipping to the next screen'));
   $('reloadBtn').addEventListener('click', () => command('reload', 'The board is reloading'));
+  $('haBtn').addEventListener('click', () => { if (!/^https?:\/\//i.test(settings().haUrl || '')) { toast('Add the Home Assistant address first'); $('haUrl').focus(); return; } command('homeassistant', 'Opening Home Assistant on the TV'); });
   $('refreshData').addEventListener('click', () => command('refreshData', 'The TV is updating weather and flights'));
 
   /* color tiles */

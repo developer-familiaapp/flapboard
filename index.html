@@ -73,6 +73,11 @@ span[data-c="w"]{background:var(--c-w)}
   display:grid;place-items:center;cursor:pointer;transition:opacity .4s}
 .gear:hover,.gear:focus-visible{color:var(--accent);outline:none;border-color:var(--accent)}
 body.idle .gear{opacity:0;pointer-events:none}
+.home{position:fixed;right:calc(70px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(22,21,19,.85);color:var(--muted);
+  display:grid;place-items:center;cursor:pointer;transition:opacity .4s}
+.home:hover,.home:focus-visible{color:var(--accent);outline:none;border-color:var(--accent)}
+body.idle .home{opacity:0;pointer-events:none}
 .hint{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   color:var(--muted);font-size:12px;letter-spacing:.08em;transition:opacity 1s;white-space:nowrap}
 .hint.gone{opacity:0}
@@ -124,7 +129,10 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 <button class="gear" id="gear" type="button" aria-label="Open settings" title="Settings (S)">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
 </button>
-<div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound</div>
+<button class="home" id="homeBtn" type="button" aria-label="Open Home Assistant" title="Home Assistant (H)" hidden>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg>
+</button>
+<div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound<span id="hintHa" hidden> · <kbd>H</kbd> home</span></div>
 
 <aside class="panel" id="panel" hidden aria-label="Board settings">
   <header>
@@ -258,6 +266,17 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
   <hr>
 
   <div class="section">
+    <h3>Home Assistant</h3>
+    <div class="field">
+      <label for="haUrl">Home Assistant address</label>
+      <input type="url" id="haUrl" autocomplete="off" placeholder="https://…">
+      <p class="help">Adds a house button (and the H key) that opens Home Assistant on the TV. Use the TV remote's Back button to return to the board.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
     <h3>Board</h3>
     <div class="row">
       <div class="field">
@@ -318,7 +337,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US',
     city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150,
+    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '',
     messages:
 `{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}
 UPDATE RECEIVED
@@ -350,7 +369,7 @@ GATE 12`,
   // Kiosk browsers forget everything on restart, so these are applied on every load.
   const HASH_MAP = {key: 'apiKey', airport: 'airport', city: 'city', size: 'size', lang: 'lang', interval: 'interval',
     refresh: 'depRefresh', temp: 'tempUnit', wind: 'windUnit', label: 'label', speed: 'speed', sound: 'sound',
-    volume: 'volume', align: 'align', source: 'depSource'};
+    volume: 'volume', align: 'align', source: 'depSource', ha: 'haUrl'};
   try {
     const hp = new URLSearchParams(location.hash.slice(1));
     hp.forEach((v, k) => {
@@ -847,7 +866,7 @@ GATE 12`,
       if (Object.keys(missing).length) cloudWrite('/settings', missing);
     }
     if (settingsSig() !== before) {
-      save();
+      save(); syncHome();
       if (S.size !== sizeBefore) build();
       if (!panel.hidden) syncForm();
       restart(); updateWeather(false); updateDepartures(false);
@@ -864,6 +883,7 @@ GATE 12`,
       if (!first) {
         if (c.action === 'next') next();
         else if (c.action === 'reload') location.reload();
+        else if (c.action === 'homeassistant') openHA();
         else if (c.action === 'refreshData') { updateWeather(true).then(restart); updateDepartures(true).then(restart); }
       }
     }
@@ -910,14 +930,17 @@ GATE 12`,
   const panel = $('panel');
   const fields = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang',
     'city', 'tempUnit', 'windUnit', 'depSource', 'airport', 'depRefresh', 'apiKey', 'flights',
-    'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume'];
+    'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume', 'haUrl'];
   function syncSource() { $('liveFields').hidden = S.depSource !== 'live'; $('manualFields').hidden = S.depSource === 'live'; }
   function syncForm() {
     fields.forEach(k => { const el = $(k); if (el === document.activeElement) return; if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k]; });
     showCloudStatus();
     $('speedOut').textContent = `${S.speed} ms per flip`;
-    syncSource(); showBudget();
+    syncSource(); showBudget(); syncHome();
   }
+  const haOk = () => /^https?:\/\/[^\s]+$/i.test((S.haUrl || '').trim());
+  function syncHome() { $('homeBtn').hidden = !haOk(); $('hintHa').hidden = !haOk(); }
+  function openHA() { if (haOk()) location.href = S.haUrl.trim(); }
   let debounce, netDebounce;
   fields.forEach(k => {
     $(k).addEventListener('input', () => {
@@ -930,6 +953,7 @@ GATE 12`,
       pushSetting(k);
       if (k === 'sound' && S.sound) initAudio();
       if (k === 'depSource') syncSource();
+      if (k === 'haUrl') { syncHome(); return; }
       if (k === 'depRefresh') { showBudget(); showDepStatus(); }
       if (k === 'size') { build(); restart(); return; }
       if (['speed', 'volume', 'sound'].includes(k)) return;
@@ -941,6 +965,7 @@ GATE 12`,
   function openPanel() { panel.hidden = false; syncForm(); showWxStatus(); showDepStatus(); $('now').focus(); }
   function closePanel() { panel.hidden = true; $('gear').focus({preventScroll: true}); }
   $('gear').addEventListener('click', openPanel);
+  $('homeBtn').addEventListener('click', openHA);
   $('close').addEventListener('click', closePanel);
   $('sendNow').addEventListener('click', () => { showNow($('now').value); $('now').value = ''; });
   $('now').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); showNow($('now').value); $('now').value = ''; } });
@@ -972,6 +997,7 @@ GATE 12`,
     else if (k === 'f') toggleFs();
     else if (k === ' ') { e.preventDefault(); next(); }
     else if (k === 'm') { S.sound = !S.sound; save(); syncForm(); }
+    else if (k === 'h') openHA();
   });
   addEventListener('pointerdown', initAudio);
 

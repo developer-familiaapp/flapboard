@@ -11,8 +11,10 @@ for v in SITE_URL FIREBASE_DB_URL BOARD_ID; do [ -n "${!v}" ] || missing="$missi
 [ -z "$missing" ] || { echo "Fill these in .env first:$missing"; exit 1; }
 DB="${FIREBASE_DB_URL%/}"
 ENC=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$DB")
+HA=""
+if [ -n "$HA_URL" ]; then HA="&ha=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$HA_URL")"; fi
 echo "TV address (Edge kiosk settings):"
-echo "  ${SITE_URL}#db=${ENC}&board=${BOARD_ID}"
+echo "  ${SITE_URL}#db=${ENC}&board=${BOARD_ID}${HA}"
 echo
 echo "Remote (phone or computer):"
 echo "  ${SITE_URL}control.html#db=${ENC}&board=${BOARD_ID}"
