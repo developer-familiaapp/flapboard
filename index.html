@@ -132,7 +132,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 <button class="home" id="homeBtn" type="button" aria-label="Open Home Assistant" title="Home Assistant (H)" hidden>
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg>
 </button>
-<div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound<span id="hintHa" hidden> · <kbd>H</kbd> home</span></div>
+<div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F11</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound<span id="hintHa" hidden> · <kbd>H</kbd> home</span></div>
 
 <aside class="panel" id="panel" hidden aria-label="Board settings">
   <header>
@@ -317,6 +317,16 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 </aside>
 
 <script>
+/* Opened in a new tab (e.g. by Home Assistant's "open URL" button, which always uses a new tab)?
+   Send the window that opened us back to the board and close this extra tab, so it all stays in one window. */
+(() => {
+  try {
+    if (window.opener && window.opener !== window && !window.opener.closed) {
+      window.opener.location.replace(location.href);
+      window.close();
+    }
+  } catch (e) {}
+})();
 (() => {
   /* ---------- character set ---------- */
   const COLOR = {R:'①',O:'②',Y:'③',G:'④',B:'⑤',V:'⑥',W:'⑦'};
