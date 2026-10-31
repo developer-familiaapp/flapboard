@@ -466,6 +466,10 @@ GATE 12`,
       this.cur = ' '; this.target = ' '; this.busy = false;
       [this.topS, this.botS].forEach(s => paint(s, ' '));
     }
+    setNow(ch) { // show a character immediately, without flipping
+      if (!IDX.has(ch)) ch = ' ';
+      this.cur = ch; this.target = ch; paint(this.topS, ch); paint(this.botS, ch);
+    }
     set(ch, delay) {
       if (ch === this.target) return;
       this.target = ch;
@@ -832,6 +836,28 @@ GATE 12`,
     render(override ? override.grid : item.fn());
   }
   function restart() { list = playlist(); idx = -1; nextAt = 0; loop(); }
+
+  /* Remember what is on the board when leaving (e.g. for Home Assistant), so coming back
+     shows the same screen at once and the rotation carries on, instead of starting over. */
+  const SNAP = 'flapboard.snapshot';
+  function saveSnapshot() {
+    if (!tiles.length) return;
+    store.set(SNAP, {at: Date.now(), size: S.size, idx, nextAt, chars: tiles.map(t => t.target).join('')});
+  }
+  function restoreSnapshot() {
+    const s = store.get(SNAP);
+    if (!s || s.size !== S.size || Date.now() - s.at > 15 * 60e3 || typeof s.chars !== 'string') return false;
+    const chars = [...s.chars];
+    if (chars.length !== tiles.length) return false;
+    tiles.forEach((t, i) => t.setNow(chars[i]));
+    list = playlist();
+    idx = Math.min(Math.max(0, s.idx | 0), list.length - 1);
+    nextAt = s.nextAt > Date.now() ? s.nextAt : 0;
+    loop();
+    return true;
+  }
+  addEventListener('pagehide', saveSnapshot);
+  setInterval(saveSnapshot, 5000);
   function next() { override = null; nextAt = 0; loop(); }
   function showNow(text) {
     if (!text.trim()) return;
@@ -1032,7 +1058,7 @@ GATE 12`,
   /* start */
   syncForm();
   build();
-  restart();
+  if (!restoreSnapshot()) restart();
   setInterval(loop, 1000);
   updateWeather(false);
   updateDepartures(false);
