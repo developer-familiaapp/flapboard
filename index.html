@@ -831,12 +831,16 @@ GATE 12`,
 
   /* ---------- remote control (Firebase Realtime Database) ---------- */
   // The address carries #db=<database url>&board=<secret id>. Phone and TV share /boards/<id>.
+  // The connection comes from the address (#db=…&board=…). It is also remembered in this browser,
+  // so the plain board address (e.g. from a "Flapboard" button in Home Assistant) reconnects too.
   const CLOUD = (() => {
+    const valid = (db, id) => /^https:\/\/[a-z0-9.-]+$/i.test(db) && id.length >= 24 && /^[A-Za-z0-9_-]+$/.test(id);
     try {
       const hp = new URLSearchParams(location.hash.slice(1));
-      const db = (hp.get('db') || '').trim().replace(/\/+$/, '');
-      const id = (hp.get('board') || '').trim();
-      if (!/^https:\/\/[a-z0-9.-]+$/i.test(db) || id.length < 24 || !/^[A-Za-z0-9_-]+$/.test(id)) return null;
+      let db = (hp.get('db') || '').trim().replace(/\/+$/, '');
+      let id = (hp.get('board') || '').trim();
+      if (valid(db, id)) store.set('flapboard.cloud', {db, id});
+      else { const saved = store.get('flapboard.cloud'); if (!saved || !valid(saved.db || '', saved.id || '')) return null; db = saved.db; id = saved.id; }
       return {db, id, base: `${db}/boards/${id}`};
     } catch (e) { return null; }
   })();
@@ -938,9 +942,11 @@ GATE 12`,
     $('speedOut').textContent = `${S.speed} ms per flip`;
     syncSource(); showBudget(); syncHome();
   }
-  const haOk = () => /^https?:\/\/[^\s]+$/i.test((S.haUrl || '').trim());
+  // Accept "home.example.com" as well as "https://home.example.com".
+  const haHref = () => { const u = (S.haUrl || '').trim(); if (!u || /\s/.test(u)) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; };
+  const haOk = () => { try { const u = new URL(haHref()); return /^https?:$/.test(u.protocol) && !!u.hostname; } catch (e) { return false; } };
   function syncHome() { $('homeBtn').hidden = !haOk(); $('hintHa').hidden = !haOk(); }
-  function openHA() { if (haOk()) location.href = S.haUrl.trim(); }
+  function openHA() { if (haOk()) location.href = haHref(); }
   let debounce, netDebounce;
   fields.forEach(k => {
     $(k).addEventListener('input', () => {

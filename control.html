@@ -435,7 +435,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
   }
   $('nextBtn').addEventListener('click', () => command('next', 'Skipping to the next screen'));
   $('reloadBtn').addEventListener('click', () => command('reload', 'The board is reloading'));
-  $('haBtn').addEventListener('click', () => { if (!/^https?:\/\//i.test(settings().haUrl || '')) { toast('Add the Home Assistant address first'); $('haUrl').focus(); return; } command('homeassistant', 'Opening Home Assistant on the TV'); });
+  $('haBtn').addEventListener('click', () => { if (!String(settings().haUrl || '').trim()) { toast('Add the Home Assistant address first'); $('haUrl').focus(); return; } command('homeassistant', 'Opening Home Assistant on the TV'); });
   $('refreshData').addEventListener('click', () => command('refreshData', 'The TV is updating weather and flights'));
 
   /* color tiles */
