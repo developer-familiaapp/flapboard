@@ -255,7 +255,12 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
         <label class="l" for="haUrl">Home Assistant address</label>
         <input type="url" id="haUrl" autocomplete="off" placeholder="https://…">
       </div>
-      <p class="help">Shows a house button on the board (and the H key). Use the TV remote's Back button to return to the board.</p>
+      <p class="help">Shows a house button on the board (and the H key). Home Assistant's own Flapboard button brings you back.</p>
+      <div class="field">
+        <label class="l" for="haPin">PIN at the TV</label>
+        <input type="password" id="haPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="4 to 8 digits">
+      </div>
+      <p class="help">When set, the TV asks for this PIN before opening Home Assistant or the board's settings. Leave it empty for no PIN. The "Open Home Assistant on TV" button here skips it.</p>
     </section>
 
     <section class="card">
@@ -316,7 +321,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     showMessages: true, showClock: true, showWeather: true, showDepartures: true,
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US', city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: ''
+    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: '', haPin: ''
   };
 
   /* ---------- connection ---------- */
@@ -389,7 +394,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
 
   /* ---------- form ---------- */
   const FIELDS = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang', 'label', 'city', 'tempUnit', 'windUnit',
-    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights', 'haUrl'];
+    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights', 'haUrl', 'haPin'];
   const dirty = new Set();
   function fillForm() {
     const s = settings();
@@ -408,6 +413,11 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     if ('interval' in body) body.interval = Math.max(5, body.interval || 5);
     if ('depRefresh' in body) body.depRefresh = Math.max(15, body.depRefresh || 15);
     if ('airport' in body) body.airport = body.airport.trim().toUpperCase();
+    if ('haPin' in body) {
+      body.haPin = String(body.haPin).trim();
+      if (!/^(\d{4,8})?$/.test(body.haPin)) { toast('The PIN must be 4 to 8 digits'); $('haPin').focus(); return; }
+      msg = body.haPin ? 'PIN saved' : 'PIN removed';
+    }
     try { await write('/settings', body); keys.forEach(k => dirty.delete(k)); toast(msg || 'Saved'); }
     catch (e) { toast(e.message); }
   }

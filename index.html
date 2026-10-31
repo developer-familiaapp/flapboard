@@ -78,6 +78,28 @@ body.idle .gear{opacity:0;pointer-events:none}
   display:grid;place-items:center;cursor:pointer;transition:opacity .4s}
 .home:hover,.home:focus-visible{color:var(--accent);outline:none;border-color:var(--accent)}
 body.idle .home{opacity:0;pointer-events:none}
+
+/* PIN pad: a small flap-board-style lock in front of Home Assistant and settings */
+.pin{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(6,6,5,.82);backdrop-filter:blur(3px);
+  padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pin-box{width:min(340px,100%);display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px 22px;border-radius:14px;
+  background:linear-gradient(#171614,#0b0a09);box-shadow:inset 0 1px 0 #2d2a26,0 0 0 1px #000,0 30px 80px rgba(0,0,0,.6)}
+.pin-title{margin:0;font-family:var(--f-tile);font-weight:600;font-size:26px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-align:center}
+.pin-dots{display:flex;gap:8px;min-height:52px}
+.pin-dots i{width:34px;height:52px;border-radius:4px;position:relative;background:linear-gradient(var(--tile-hi),var(--tile))}
+.pin-dots i::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:var(--hinge)}
+.pin-dots i.on::before{content:"";position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--accent);z-index:1}
+.pin-box.bad .pin-dots{animation:pinshake .35s}
+@keyframes pinshake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pin-msg{margin:0;min-height:1.4em;font-size:13px;color:var(--muted);text-align:center}
+.pin-msg.bad{color:var(--bad)}
+.pin-keys{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pin-keys button{height:60px;border-radius:10px;border:1px solid var(--line);background:#141311;color:var(--ink);cursor:pointer;
+  font-family:var(--f-tile);font-weight:600;font-size:28px}
+.pin-keys button:hover,.pin-keys button:focus-visible{border-color:var(--accent);outline:none}
+.pin-keys button.aux{font-family:var(--f-ui);font-size:13px;color:var(--muted)}
+.pin-keys button[data-k="back"]{font-size:22px}
+@media (prefers-reduced-motion: reduce){ .pin-box.bad .pin-dots{animation:none} }
 .hint{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   color:var(--muted);font-size:12px;letter-spacing:.08em;transition:opacity 1s;white-space:nowrap}
 .hint.gone{opacity:0}
@@ -133,6 +155,20 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg>
 </button>
 <div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F11</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound<span id="hintHa" hidden> · <kbd>H</kbd> home</span></div>
+
+<div class="pin" id="pin" hidden role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="pin-box" id="pinBox">
+    <h2 class="pin-title" id="pinTitle">Enter PIN</h2>
+    <div class="pin-dots" id="pinDots" aria-hidden="true"></div>
+    <p class="pin-msg" id="pinMsg" aria-live="polite"></p>
+    <div class="pin-keys" id="pinKeys">
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+      <button type="button" class="aux" data-k="cancel">Cancel</button><button type="button" data-k="0">0</button><button type="button" class="aux" data-k="back" aria-label="Delete last digit">⌫</button>
+    </div>
+  </div>
+</div>
 
 <aside class="panel" id="panel" hidden aria-label="Board settings">
   <header>
@@ -347,7 +383,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US',
     city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '',
+    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '', haPin: '',
     messages:
 `{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}
 UPDATE RECEIVED
@@ -923,7 +959,7 @@ GATE 12`,
       if (!first) {
         if (c.action === 'next') next();
         else if (c.action === 'reload') location.reload();
-        else if (c.action === 'homeassistant') openHA();
+        else if (c.action === 'homeassistant') goHA(); // sent from the remote, so no PIN
         else if (c.action === 'refreshData') { updateWeather(true).then(restart); updateDepartures(true).then(restart); }
       }
     }
@@ -982,7 +1018,45 @@ GATE 12`,
   const haHref = () => { const u = (S.haUrl || '').trim(); if (!u || /\s/.test(u)) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; };
   const haOk = () => { try { const u = new URL(haHref()); return /^https?:$/.test(u.protocol) && !!u.hostname; } catch (e) { return false; } };
   function syncHome() { $('homeBtn').hidden = !haOk(); $('hintHa').hidden = !haOk(); }
-  function openHA() { if (haOk()) location.href = haHref(); }
+  function goHA() { if (haOk()) location.href = haHref(); }
+  function openHA() { if (haOk()) askPin(goHA, S.lang === 'pt-BR' ? 'PIN da casa' : 'Home PIN'); }
+
+  /* ---------- PIN lock (set from the remote; protects Home Assistant and settings at the TV) ---------- */
+  const pinSet = () => /^\d{4,8}$/.test(String(S.haPin || ''));
+  let pinEntry = '', pinOk = null, pinFails = 0, pinLockedUntil = 0, pinIdleT;
+  const pinEl = $('pin');
+  function pinDraw(msg = '', bad = false) {
+    const n = String(S.haPin).length;
+    $('pinDots').replaceChildren(...Array.from({length: n}, (_, i) => { const d = document.createElement('i'); if (i < pinEntry.length) d.className = 'on'; return d; }));
+    $('pinMsg').textContent = msg; $('pinMsg').className = 'pin-msg' + (bad ? ' bad' : '');
+  }
+  function askPin(onOk, title) {
+    if (!pinSet()) { onOk(); return; }
+    pinOk = onOk; pinEntry = ''; $('pinTitle').textContent = title;
+    pinEl.hidden = false; pinDraw(); wake();
+    $('pinKeys').querySelector('[data-k="5"]').focus({preventScroll: true});
+    pinTouch();
+  }
+  function pinClose() { pinEl.hidden = true; pinOk = null; pinEntry = ''; clearTimeout(pinIdleT); }
+  function pinTouch() { clearTimeout(pinIdleT); pinIdleT = setTimeout(pinClose, 30000); }
+  function pinKey(k) {
+    if (pinEl.hidden) return;
+    pinTouch();
+    if (k === 'cancel') { pinClose(); return; }
+    const wait = Math.ceil((pinLockedUntil - Date.now()) / 1000);
+    if (wait > 0) { pinDraw(`Too many tries. Wait ${wait}s.`, true); return; }
+    if (k === 'back') { pinEntry = pinEntry.slice(0, -1); pinDraw(); return; }
+    if (!/^\d$/.test(k) || pinEntry.length >= String(S.haPin).length) return;
+    pinEntry += k; pinDraw();
+    if (pinEntry.length < String(S.haPin).length) return;
+    if (pinEntry === String(S.haPin)) { const ok = pinOk; pinFails = 0; pinClose(); if (ok) ok(); return; }
+    pinFails++; pinEntry = '';
+    if (pinFails >= 5) { pinFails = 0; pinLockedUntil = Date.now() + 60000; pinDraw('Too many tries. Wait 60s.', true); }
+    else pinDraw('Wrong PIN', true);
+    const box = $('pinBox'); box.classList.remove('bad'); void box.offsetWidth; box.classList.add('bad');
+  }
+  $('pinKeys').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pinKey(b.dataset.k); });
+  pinEl.addEventListener('click', e => { if (e.target === pinEl) pinClose(); });
   let debounce, netDebounce;
   fields.forEach(k => {
     $(k).addEventListener('input', () => {
@@ -1006,7 +1080,8 @@ GATE 12`,
   });
   function openPanel() { panel.hidden = false; syncForm(); showWxStatus(); showDepStatus(); $('now').focus(); }
   function closePanel() { panel.hidden = true; $('gear').focus({preventScroll: true}); }
-  $('gear').addEventListener('click', openPanel);
+  const lockedPanel = () => askPin(openPanel, S.lang === 'pt-BR' ? 'PIN das configurações' : 'Settings PIN');
+  $('gear').addEventListener('click', lockedPanel);
   $('homeBtn').addEventListener('click', openHA);
   $('close').addEventListener('click', closePanel);
   $('sendNow').addEventListener('click', () => { showNow($('now').value); $('now').value = ''; });
@@ -1017,7 +1092,7 @@ GATE 12`,
   $('depRefreshNow').addEventListener('click', () => updateDepartures(true).then(restart));
   $('reset').addEventListener('click', () => {
     const key = S.apiKey;
-    S = {...DEFAULTS, apiKey: key}; save(); syncForm(); build(); restart(); updateWeather(true); updateDepartures(false);
+    S = {...DEFAULTS, apiKey: key, haUrl: S.haUrl, haPin: S.haPin}; save(); syncForm(); build(); restart(); updateWeather(true); updateDepartures(false);
     if (CLOUD) { const all = {}; Object.keys(DEFAULTS).forEach(k => { all[k] = S[k]; }); cloudWrite('/settings', all); }
     $('resetNote').hidden = false; setTimeout(() => { $('resetNote').hidden = true; }, 2500);
   });
@@ -1031,11 +1106,18 @@ GATE 12`,
 
   addEventListener('keydown', e => {
     initAudio();
+    if (!pinEl.hidden) { // the PIN pad takes the keyboard while it is open
+      e.preventDefault();
+      if (/^\d$/.test(e.key)) pinKey(e.key);
+      else if (e.key === 'Backspace') pinKey('back');
+      else if (e.key === 'Escape') pinKey('cancel');
+      return;
+    }
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
     if (e.key === 'Escape' && !panel.hidden) { closePanel(); return; }
     if (typing) return;
     const k = e.key.toLowerCase();
-    if (k === 's') { e.preventDefault(); panel.hidden ? openPanel() : closePanel(); }
+    if (k === 's') { e.preventDefault(); panel.hidden ? lockedPanel() : closePanel(); }
     else if (k === 'f') toggleFs();
     else if (k === ' ') { e.preventDefault(); next(); }
     else if (k === 'm') { S.sound = !S.sound; save(); syncForm(); }
@@ -1045,7 +1127,7 @@ GATE 12`,
 
   /* idle cursor + hint */
   let idleT;
-  function wake() { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (panel.hidden) document.body.classList.add('idle'); }, 3000); }
+  function wake() { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (panel.hidden && pinEl.hidden) document.body.classList.add('idle'); }, 3000); }
   ['mousemove', 'pointerdown', 'keydown'].forEach(ev => addEventListener(ev, wake));
   wake();
   setTimeout(() => $('hint').classList.add('gone'), 7000);
