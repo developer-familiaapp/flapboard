@@ -101,8 +101,12 @@ body.idle .home{opacity:0;pointer-events:none}
 .pin-keys button[data-k="back"]{font-size:22px}
 @media (prefers-reduced-motion: reduce){ .pin-box.bad .pin-dots{animation:none} }
 .hint{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
-  color:var(--muted);font-size:12px;letter-spacing:.08em;transition:opacity 1s;white-space:nowrap}
-.hint.gone{opacity:0}
+  display:flex;align-items:center;gap:10px;max-width:calc(100% - 160px);
+  color:var(--muted);font-size:12px;letter-spacing:.08em;white-space:nowrap}
+.hint-keys{overflow:hidden;text-overflow:ellipsis}
+.hint-hide{flex:none;width:22px;height:22px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font:inherit;font-size:14px;line-height:1;cursor:pointer}
+.hint-hide:hover,.hint-hide:focus-visible{color:var(--accent);border-color:var(--accent);outline:none}
 kbd{font-family:var(--f-ui);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--ink)}
 
 .panel{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);box-sizing:border-box;overflow-y:auto;z-index:10;
@@ -138,7 +142,7 @@ kbd{font-family:var(--f-ui);border:1px solid var(--line);border-bottom-width:2px
 input[type=range]{accent-color:var(--accent);width:100%}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
-@media (prefers-reduced-motion: reduce){ .gear,.hint{transition:none} }
+@media (prefers-reduced-motion: reduce){ .gear{transition:none} }
 </style>
 </head>
 <body>
@@ -154,7 +158,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 <button class="home" id="homeBtn" type="button" aria-label="Open Home Assistant" title="Home Assistant (H)" hidden>
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg>
 </button>
-<div class="hint" id="hint"><kbd>S</kbd> settings · <kbd>F11</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound<span id="hintHa" hidden> · <kbd>H</kbd> home</span></div>
+<div class="hint" id="hint"><span class="hint-keys"><kbd>S</kbd> settings · <kbd>F11</kbd> fullscreen · <kbd>Space</kbd> next screen · <kbd>M</kbd> sound<span id="hintHa" hidden> · <kbd>H</kbd> home</span></span><button class="hint-hide" id="hintHide" type="button" aria-label="Hide this guide" title="Hide (turn it back on in settings)">×</button></div>
 
 <div class="pin" id="pin" hidden role="dialog" aria-modal="true" aria-labelledby="pinTitle">
   <div class="pin-box" id="pinBox">
@@ -345,6 +349,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
         <input type="range" id="volume" min="0" max="100" step="5">
       </div>
     </div>
+    <label class="check"><input type="checkbox" id="showHint"> Show the key guide at the bottom</label>
     <div class="actions">
       <button class="btn primary" id="fs" type="button">Go fullscreen</button>
       <button class="btn" id="next" type="button">Next screen</button>
@@ -385,7 +390,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US',
     city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'combined', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '', haPin: '',
+    depSource: 'combined', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '', haPin: '', showHint: true,
     messages:
 `{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}
 UPDATE RECEIVED
@@ -1014,6 +1019,7 @@ GATE 12`,
       save(); syncHome();
       if (S.size !== sizeBefore) build();
       if (!panel.hidden) syncForm();
+      syncHint(); syncHome();
       restart(); updateWeather(false); updateDepartures(false); updateSchedule(false);
     }
     const n = cloud.now;
@@ -1075,13 +1081,13 @@ GATE 12`,
   const panel = $('panel');
   const fields = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang',
     'city', 'tempUnit', 'windUnit', 'depSource', 'airport', 'depRefresh', 'apiKey', 'flights',
-    'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume', 'haUrl'];
+    'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume', 'haUrl', 'showHint'];
   function syncSource() { $('liveFields').hidden = S.depSource === 'manual'; $('manualFields').hidden = S.depSource !== 'manual'; }
   function syncForm() {
     fields.forEach(k => { const el = $(k); if (el === document.activeElement) return; if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k]; });
     showCloudStatus();
     $('speedOut').textContent = `${S.speed} ms per flip`;
-    syncSource(); showBudget(); syncHome();
+    syncSource(); showBudget(); syncHome(); syncHint();
   }
   // Accept "home.example.com" as well as "https://home.example.com".
   const haHref = () => { const u = (S.haUrl || '').trim(); if (!u || /\s/.test(u)) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; };
@@ -1140,6 +1146,7 @@ GATE 12`,
       if (k === 'depSource') syncSource();
       if (k === 'haUrl') { syncHome(); return; }
       if (k === 'depRefresh') { showBudget(); showDepStatus(); }
+      if (k === 'showHint') { syncHint(); return; }
       if (k === 'size') { build(); restart(); return; }
       if (['speed', 'volume', 'sound'].includes(k)) return;
       if (['city', 'tempUnit', 'windUnit', 'lang'].includes(k)) { clearTimeout(netDebounce); netDebounce = setTimeout(() => updateWeather(true), 1200); }
@@ -1199,7 +1206,10 @@ GATE 12`,
   function wake() { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => { if (panel.hidden && pinEl.hidden) document.body.classList.add('idle'); }, 3000); }
   ['mousemove', 'pointerdown', 'keydown'].forEach(ev => addEventListener(ev, wake));
   wake();
-  setTimeout(() => $('hint').classList.add('gone'), 7000);
+  // Key guide at the bottom: stays visible until hidden with its × (bring it back in settings or the remote)
+  function syncHint() { $('hint').hidden = !S.showHint; }
+  $('hintHide').addEventListener('click', () => { S.showHint = false; save(); pushSetting('showHint'); syncHint(); if (!panel.hidden) syncForm(); });
+  syncHint();
 
   /* keep the TV awake */
   async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') await navigator.wakeLock.request('screen'); } catch (e) {} }

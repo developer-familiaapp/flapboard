@@ -287,6 +287,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
           <input type="range" id="volume" min="0" max="100" step="5">
         </div>
       </div>
+      <label class="check"><input type="checkbox" id="showHint"> Show the key guide at the bottom of the board</label>
     </section>
 
     <section class="card span">
@@ -322,7 +323,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     showMessages: true, showClock: true, showWeather: true, showDepartures: true,
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US', city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'combined', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: '', haPin: ''
+    depSource: 'combined', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: '', haPin: '', showHint: true
   };
 
   /* ---------- connection ---------- */
@@ -395,7 +396,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
 
   /* ---------- form ---------- */
   const FIELDS = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang', 'label', 'city', 'tempUnit', 'windUnit',
-    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights', 'haUrl', 'haPin'];
+    'depSource', 'airport', 'depRefresh', 'apiKey', 'size', 'align', 'speed', 'sound', 'volume', 'messages', 'flights', 'haUrl', 'haPin', 'showHint'];
   const dirty = new Set();
   function fillForm() {
     const s = settings();
