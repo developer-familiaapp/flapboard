@@ -222,7 +222,8 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
       <h2>Departures</h2>
       <div class="field">
         <label class="l" for="depSource">Source</label>
-        <select id="depSource"><option value="live">Live from AeroDataBox</option><option value="manual">My own list</option></select>
+        <select id="depSource"><option value="combined">Official schedule + live status</option><option value="live">Live from AeroDataBox only</option><option value="manual">My own list</option></select>
+        <p class="help">The official schedule is Brazil's ANAC timetable: free, no key, airports in Brazil. With a RapidAPI key, live delays, boarding and cancellations are added on top.</p>
       </div>
       <div id="liveBox" class="row">
         <div class="field">
@@ -321,7 +322,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
     showMessages: true, showClock: true, showWeather: true, showDepartures: true,
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US', city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: '', haPin: ''
+    depSource: 'combined', airport: 'GIG', apiKey: '', depRefresh: 150, messages: '', flights: '', haUrl: '', haPin: ''
   };
 
   /* ---------- connection ---------- */
@@ -403,7 +404,7 @@ ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
       if (el === document.activeElement || dirty.has(k)) return;
       if (el.type === 'checkbox') el.checked = !!s[k]; else el.value = s[k];
     });
-    const live = s.depSource === 'live';
+    const live = s.depSource !== 'manual';
     $('liveBox').hidden = !live; $('keyBox').hidden = !live; $('manualBox').hidden = live;
   }
   const valueOf = el => el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? Number(el.value) : el.value;

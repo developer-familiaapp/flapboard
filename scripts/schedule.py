@@ -28,7 +28,8 @@ CITY = {
     "SKBO": "BOGOTA", "SUMU": "MONTEVIDEO", "MPTO": "PANAMA", "SGAS": "ASUNCION", "MMMX": "MEXICO CITY",
 }
 # ICAO -> IATA airline codes where the open list is missing or ambiguous.
-AIRLINE = {"TAM": "LA", "LAN": "LA", "GLO": "G3", "AZU": "AD", "TAP": "TP", "PTB": "2Z", "VOE": "VO"}
+AIRLINE = {"TAM": "LA", "LAN": "LA", "GLO": "G3", "AZU": "AD", "TAP": "TP", "PTB": "2Z", "VOE": "VO",
+           "BOV": "OB", "ITY": "AZ", "JES": "WJ", "JAT": "JA", "SKU": "H2"}
 
 
 def get(url, tries=4):

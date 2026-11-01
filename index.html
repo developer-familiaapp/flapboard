@@ -245,7 +245,8 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     <div class="field">
       <label for="depSource">Source</label>
       <select id="depSource">
-        <option value="live">Live from AeroDataBox</option>
+        <option value="combined">Official schedule + live status</option>
+        <option value="live">Live from AeroDataBox only</option>
         <option value="manual">My own list</option>
       </select>
     </div>
@@ -274,7 +275,8 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
       <textarea id="flights" rows="6" spellcheck="false"></textarea>
       <p class="help">One flight per line: <b>time, destination, flight, status</b>.</p>
     </div>
-    <p class="help">Tile colors: <span class="swatches"><i style="background:var(--c-g)"></i></span> on time, <span class="swatches"><i style="background:var(--c-b)"></i></span> boarding, <span class="swatches"><i style="background:var(--c-y)"></i></span> delayed (new time shown), <span class="swatches"><i style="background:var(--c-r)"></i></span> cancelled.</p>
+    <p class="help">"Official schedule" uses Brazil's ANAC flight schedule (free, airports in Brazil), and adds live status from AeroDataBox when a key is set.</p>
+    <p class="help">Tile colors: <span class="swatches"><i style="background:var(--c-w)"></i></span> scheduled (no live update yet), <span class="swatches"><i style="background:var(--c-g)"></i></span> on time, <span class="swatches"><i style="background:var(--c-b)"></i></span> boarding, <span class="swatches"><i style="background:var(--c-y)"></i></span> delayed (new time shown), <span class="swatches"><i style="background:var(--c-r)"></i></span> cancelled.</p>
   </div>
 
   <hr>
@@ -383,7 +385,7 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
     interval: 20, size: '22x6', align: 'center', speed: 80, sound: true, volume: 45,
     label: 'LOCAL TIME', lang: 'en-US',
     city: 'Rio de Janeiro', tempUnit: 'celsius', windUnit: 'kn',
-    depSource: 'live', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '', haPin: '',
+    depSource: 'combined', airport: 'GIG', apiKey: '', depRefresh: 150, haUrl: '', haPin: '',
     messages:
 `{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}{G}
 UPDATE RECEIVED
@@ -755,10 +757,68 @@ GATE 12`,
       };
     }).filter(f => f.num && f.sched);
   }
-  async function updateDepartures(force) {
-    if (S.depSource !== 'live' || depBusy) return;
+  /* Official schedule from ANAC (Brazil), saved every few hours by a GitHub job into data/schedule/ */
+  let SCHED = null, schedBusy = false; // {code, icao, tz, departures, fetchedAt}
+  async function updateSchedule(force) {
+    if (S.depSource !== 'combined' || schedBusy) return;
     const code = S.airport.trim().toUpperCase();
-    if (!S.apiKey.trim()) { setStatus('depStatus', 'Add your RapidAPI key to show live departures.'); return; }
+    if (!force && SCHED && SCHED.code === code && Date.now() - SCHED.fetchedAt < 30 * 60e3) return;
+    schedBusy = true;
+    try {
+      let icao = code;
+      if (code.length !== 4) {
+        const idx = await getJSON(`data/schedule/index.json?v=${Date.now()}`);
+        icao = idx && idx.airports && idx.airports[code];
+        if (!icao) throw new Error(`The official schedule has no flights for ${code}. It covers airports in Brazil.`);
+      }
+      const doc = await getJSON(`data/schedule/${icao}.json?v=${Date.now()}`);
+      SCHED = {code, icao, tz: doc.tz || 'America/Sao_Paulo', departures: Array.isArray(doc.departures) ? doc.departures : [], fetchedAt: Date.now()};
+      schedError = '';
+    } catch (e) {
+      if (e.status === 404) e.message = `The official schedule has no flights for ${code}. It covers airports in Brazil.`;
+      SCHED = SCHED && SCHED.code === code ? SCHED : null;
+      schedError = e.message;
+    } finally { schedBusy = false; showDepStatus(); }
+  }
+  let schedError = '';
+  const normNum = n => { const m = String(n || '').toUpperCase().replace(/\s+/g, '').match(/^([A-Z0-9]{2}?)(\d+)$/); return m ? m[1] + String(+m[2]) : String(n || '').toUpperCase().replace(/\s+/g, ''); };
+  function localTime(ms, tz) { try { return new Date(ms).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz}); } catch (e) { return hhmm(new Date(ms)); } }
+  function liveStatusColor(f) {
+    const st = f.status.toLowerCase();
+    if (st.startsWith('cancel')) return 'R';
+    if (st.startsWith('boarding') || st.startsWith('gateclosed')) return 'B';
+    if (st.startsWith('delayed') || (f.rev && f.rev - f.sched > 10 * 60e3)) return 'Y';
+    return 'G';
+  }
+  function combinedRows() {
+    if (!SCHED || SCHED.code !== S.airport.trim().toUpperCase()) return null;
+    const now = Date.now();
+    const liveFresh = DEP && DEP.airport === SCHED.code && now - DEP.fetchedAt < 8 * 3600e3;
+    const live = new Map(liveFresh ? DEP.flights.map(f => [normNum(f.num), f]) : []);
+    const used = new Set();
+    const rows = [];
+    for (const s of SCHED.departures) {
+      const key = normNum(s.num), f = live.get(key);
+      if (f) used.add(key);
+      if (f && ACTIVE_GONE.test(f.status)) continue;
+      const when = f && f.rev ? f.rev : s.t;
+      if (when < now - 5 * 60e3) continue;
+      const color = f ? liveStatusColor(f) : 'W';
+      const time = color === 'Y' && f.rev ? localTime(f.rev, SCHED.tz) : localTime(s.t, SCHED.tz);
+      rows.push({t: s.t, time, dest: s.dest, num: s.num, color});
+    }
+    for (const [key, f] of live) { // live flights the schedule doesn't list (charters, late additions)
+      if (used.has(key) || ACTIVE_GONE.test(f.status) || (f.rev || f.sched) < now - 5 * 60e3) continue;
+      const color = liveStatusColor(f);
+      rows.push({t: f.sched, time: color === 'Y' && f.revLocal ? f.revLocal : (f.schedLocal || localTime(f.sched, SCHED.tz)), dest: f.dest, num: f.num, color});
+    }
+    return rows.sort((a, b) => a.t - b.t);
+  }
+
+  async function updateDepartures(force) {
+    if ((S.depSource !== 'live' && S.depSource !== 'combined') || depBusy) return;
+    const code = S.airport.trim().toUpperCase();
+    if (!S.apiKey.trim()) { setStatus('depStatus', S.depSource === 'combined' ? 'Showing the official schedule. Add your RapidAPI key to also show live status.' : 'Add your RapidAPI key to show live departures.'); if (S.depSource === 'combined') showDepStatus(); return; }
     if (!/^[A-Z0-9]{3,4}$/.test(code)) { setStatus('depStatus', 'Enter a 3-letter IATA or 4-letter ICAO airport code.', 'bad'); return; }
     const fresh = DEP && DEP.airport === code && Date.now() - DEP.fetchedAt < S.depRefresh * 60e3;
     if (!force && fresh) { showDepStatus(); return; }
@@ -781,6 +841,15 @@ GATE 12`,
     } finally { depBusy = false; }
   }
   function showDepStatus() {
+    if (S.depSource === 'combined') {
+      const code = S.airport.trim().toUpperCase();
+      if (!SCHED || SCHED.code !== code) { if (schedError) setStatus('depStatus', schedError, 'bad'); return; }
+      const upcoming = (combinedRows() || []).length;
+      let liveTxt = 'add a RapidAPI key for live status';
+      if (S.apiKey.trim()) liveTxt = DEP && DEP.airport === code ? `live status from ${clockStr(DEP.fetchedAt)}, next ${clockStr(DEP.fetchedAt + S.depRefresh * 60e3)}` : 'live status not loaded yet';
+      setStatus('depStatus', `${code} · ${upcoming} upcoming departures (official schedule) · ${liveTxt}`, 'ok');
+      return;
+    }
     if (!DEP) return;
     const next = DEP.fetchedAt + S.depRefresh * 60e3;
     setStatus('depStatus', `${DEP.airport} · ${DEP.flights.length} departures · updated ${clockStr(DEP.fetchedAt)}, next ${clockStr(next)}`, 'ok');
@@ -817,7 +886,7 @@ GATE 12`,
       return {time: p[0], dest: p[1] || '', num: p[2] || '', color};
     });
   }
-  function departureRows() { return S.depSource === 'live' ? liveRows() : manualRows(); }
+  function departureRows() { return S.depSource === 'combined' ? combinedRows() : S.depSource === 'live' ? liveRows() : manualRows(); }
   function departurePages() {
     const rows = departureRows();
     if (!rows || !rows.length) return [[]];
@@ -826,7 +895,7 @@ GATE 12`,
     return pages;
   }
   function departuresGrid(page) {
-    const title = S.depSource === 'live' ? `${t('dep')} ${S.airport.trim().toUpperCase()}` : t('dep');
+    const title = S.depSource !== 'manual' ? `${t('dep')} ${S.airport.trim().toUpperCase()}` : t('dep');
     const g = header(title);
     const rows = departurePages()[page];
     if (!rows || !rows.length) {
@@ -945,7 +1014,7 @@ GATE 12`,
       save(); syncHome();
       if (S.size !== sizeBefore) build();
       if (!panel.hidden) syncForm();
-      restart(); updateWeather(false); updateDepartures(false);
+      restart(); updateWeather(false); updateDepartures(false); updateSchedule(false);
     }
     const n = cloud.now;
     if (n && n.id && n.id !== lastNowId) {
@@ -960,7 +1029,7 @@ GATE 12`,
         if (c.action === 'next') next();
         else if (c.action === 'reload') location.reload();
         else if (c.action === 'homeassistant') goHA(); // sent from the remote, so no PIN
-        else if (c.action === 'refreshData') { updateWeather(true).then(restart); updateDepartures(true).then(restart); }
+        else if (c.action === 'refreshData') { updateWeather(true).then(restart); updateDepartures(true).then(restart); updateSchedule(true); }
       }
     }
   }
@@ -1007,7 +1076,7 @@ GATE 12`,
   const fields = ['showMessages', 'showClock', 'showWeather', 'showDepartures', 'interval', 'lang',
     'city', 'tempUnit', 'windUnit', 'depSource', 'airport', 'depRefresh', 'apiKey', 'flights',
     'messages', 'label', 'size', 'align', 'speed', 'sound', 'volume', 'haUrl'];
-  function syncSource() { $('liveFields').hidden = S.depSource !== 'live'; $('manualFields').hidden = S.depSource === 'live'; }
+  function syncSource() { $('liveFields').hidden = S.depSource === 'manual'; $('manualFields').hidden = S.depSource !== 'manual'; }
   function syncForm() {
     fields.forEach(k => { const el = $(k); if (el === document.activeElement) return; if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k]; });
     showCloudStatus();
@@ -1074,7 +1143,7 @@ GATE 12`,
       if (k === 'size') { build(); restart(); return; }
       if (['speed', 'volume', 'sound'].includes(k)) return;
       if (['city', 'tempUnit', 'windUnit', 'lang'].includes(k)) { clearTimeout(netDebounce); netDebounce = setTimeout(() => updateWeather(true), 1200); }
-      if (['airport', 'apiKey', 'depSource'].includes(k)) { clearTimeout(netDebounce); netDebounce = setTimeout(() => updateDepartures(false), 1200); }
+      if (['airport', 'apiKey', 'depSource'].includes(k)) { clearTimeout(netDebounce); netDebounce = setTimeout(() => { updateDepartures(false); updateSchedule(false); }, 1200); }
       clearTimeout(debounce); debounce = setTimeout(restart, 500);
     });
   });
@@ -1089,10 +1158,10 @@ GATE 12`,
   $('next').addEventListener('click', next);
   $('fs').addEventListener('click', toggleFs);
   $('wxRefresh').addEventListener('click', () => updateWeather(true).then(restart));
-  $('depRefreshNow').addEventListener('click', () => updateDepartures(true).then(restart));
+  $('depRefreshNow').addEventListener('click', () => { updateSchedule(true); updateDepartures(true).then(restart); });
   $('reset').addEventListener('click', () => {
     const key = S.apiKey;
-    S = {...DEFAULTS, apiKey: key, haUrl: S.haUrl, haPin: S.haPin}; save(); syncForm(); build(); restart(); updateWeather(true); updateDepartures(false);
+    S = {...DEFAULTS, apiKey: key, haUrl: S.haUrl, haPin: S.haPin}; save(); syncForm(); build(); restart(); updateWeather(true); updateDepartures(false); updateSchedule(false);
     if (CLOUD) { const all = {}; Object.keys(DEFAULTS).forEach(k => { all[k] = S[k]; }); cloudWrite('/settings', all); }
     $('resetNote').hidden = false; setTimeout(() => { $('resetNote').hidden = true; }, 2500);
   });
@@ -1144,7 +1213,8 @@ GATE 12`,
   setInterval(loop, 1000);
   updateWeather(false);
   updateDepartures(false);
-  setInterval(() => { updateWeather(false); updateDepartures(false); }, 60e3);
+  updateSchedule(false);
+  setInterval(() => { updateWeather(false); updateDepartures(false); updateSchedule(false); }, 60e3);
   connectCloud();
   heartbeat();
   setInterval(heartbeat, 30e3);
