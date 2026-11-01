@@ -1,0 +1,1 @@
+{"airport":"SBMA","iata":"MAB","tz":"America/Belem","source":"ANAC SIROS","days":["2026-10-31","2026-11-01"],"departures":[{"t":1793515200000,"num":"G31763","dest":"BRASILIA","destCode":"BSB"},{"t":1793521500000,"num":"LA3501","dest":"BRASILIA","destCode":"BSB"},{"t":1793555400000,"num":"AD4210","dest":"BELEM","destCode":"BEL"}]}

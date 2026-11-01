@@ -1,0 +1,1 @@
+{"airport":"SBCX","iata":"CXJ","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-10-31","2026-11-01"],"departures":[{"t":1793557200000,"num":"AD4988","dest":"CAMPINAS","destCode":"VCP"},{"t":1793562000000,"num":"G31245","dest":"SAO PAULO","destCode":"CGH"},{"t":1793569200000,"num":"LA3839","dest":"SAO PAULO","destCode":"GRU"}]}

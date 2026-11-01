@@ -1,0 +1,1 @@
+{"airport":"SBDN","iata":"PPB","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-10-31","2026-11-01"],"departures":[{"t":1793555400000,"num":"AD4520","dest":"CAMPINAS","destCode":"VCP"},{"t":1793558400000,"num":"AD2533","dest":"NATAL","destCode":"NAT"},{"t":1793561700000,"num":"G31335","dest":"SAO PAULO","destCode":"CGH"}]}
