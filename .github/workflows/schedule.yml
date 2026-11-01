@@ -1,0 +1,40 @@
+name: Flight schedule (ANAC)
+
+# Downloads Brazil's official flight schedule (ANAC SIROS) and saves today's and
+# tomorrow's departures per airport in data/schedule/ for the board.
+on:
+  schedule:
+    - cron: "17 */4 * * *"   # every 4 hours
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/schedule.py
+      - .github/workflows/schedule.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: schedule
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download schedule
+        run: python scripts/schedule.py
+      - name: Save to the repository
+        run: |
+          git config user.name "flapboard-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/schedule
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Update flight schedule from ANAC"
+          git pull --rebase -q
+          git push
