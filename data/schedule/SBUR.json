@@ -1,1 +1,1 @@
-{"airport":"SBUR","iata":"UBA","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-01","2026-11-02"],"departures":[{"t":1793628300000,"num":"AD6123","dest":"BELO HORIZONTE","destCode":"CNF"}]}
+{"airport":"SBUR","iata":"UBA","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-02","2026-11-03"],"departures":[{"t":1793628300000,"num":"AD6123","dest":"BELO HORIZONTE","destCode":"CNF"},{"t":1793714700000,"num":"AD6123","dest":"BELO HORIZONTE","destCode":"CNF"},{"t":1793732400000,"num":"LA3597","dest":"SAO PAULO","destCode":"GRU"}]}

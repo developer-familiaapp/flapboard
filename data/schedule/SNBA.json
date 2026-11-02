@@ -1,1 +1,1 @@
-{"airport":"SNBA","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-01","2026-11-02"],"departures":[]}
+{"airport":"SNBA","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-02","2026-11-03"],"departures":[{"t":1793737200000,"num":"ACN5190","dest":"CAMPINAS","destCode":"VCP"}]}
