@@ -1,1 +1,1 @@
-{"airport":"SBAT","iata":"AFL","tz":"America/Campo_Grande","source":"ANAC SIROS","days":["2026-11-02","2026-11-03"],"departures":[{"t":1793739900000,"num":"AD4242","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBAT","iata":"AFL","tz":"America/Campo_Grande","source":"ANAC SIROS","days":["2026-11-03","2026-11-04"],"departures":[{"t":1793739900000,"num":"AD4242","dest":"CAMPINAS","destCode":"VCP"},{"t":1793815800000,"num":"AD2633","dest":"CUIABA","destCode":"CGB"}]}
