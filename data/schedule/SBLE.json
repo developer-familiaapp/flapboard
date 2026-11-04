@@ -1,1 +1,1 @@
-{"airport":"SBLE","iata":"LEC","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-01","2026-11-02"],"departures":[]}
+{"airport":"SBLE","iata":"LEC","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-04","2026-11-05"],"departures":[{"t":1793889000000,"num":"AD4249","dest":"SALVADOR","destCode":"SSA"}]}
