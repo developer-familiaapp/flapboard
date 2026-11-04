@@ -1,1 +1,1 @@
-{"airport":"SBSO","iata":"SMT","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-04","2026-11-05"],"departures":[{"t":1793802900000,"num":"AD2816","dest":"CAMPINAS","destCode":"VCP"},{"t":1793889300000,"num":"AD2816","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBSO","iata":"SMT","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-04","2026-11-05"],"departures":[{"t":1793889300000,"num":"AD2816","dest":"CAMPINAS","destCode":"VCP"}]}
