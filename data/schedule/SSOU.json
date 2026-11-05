@@ -1,1 +1,1 @@
-{"airport":"SSOU","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-04","2026-11-05"],"departures":[]}
+{"airport":"SSOU","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-05","2026-11-06"],"departures":[{"t":1793975100000,"num":"ACN5124","dest":"CUIABA","destCode":"CGB"}]}
