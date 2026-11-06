@@ -1,1 +1,1 @@
-{"airport":"SBOI","iata":"OYK","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1793970300000,"num":"AD9591","dest":"MACAPA","destCode":"MCP"},{"t":1793997000000,"num":"AD9595","dest":"MACAPA","destCode":"MCP"}]}
+{"airport":"SBOI","iata":"OYK","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1793997000000,"num":"AD9595","dest":"MACAPA","destCode":"MCP"}]}
