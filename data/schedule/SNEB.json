@@ -1,1 +1,1 @@
-{"airport":"SNEB","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-05","2026-11-06"],"departures":[]}
+{"airport":"SNEB","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1794078300000,"num":"ACN5327","dest":"BELEM","destCode":"BEL"}]}

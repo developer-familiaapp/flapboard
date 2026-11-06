@@ -1,1 +1,1 @@
-{"airport":"SBJA","iata":"JJG","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-05","2026-11-06"],"departures":[{"t":1793997600000,"num":"LA4771","dest":"SAO PAULO","destCode":"GRU"},{"t":1794001200000,"num":"ACN5459","dest":"JOINVILLE","destCode":"JOI"}]}
+{"airport":"SBJA","iata":"JJG","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1793997600000,"num":"LA4771","dest":"SAO PAULO","destCode":"GRU"},{"t":1794001200000,"num":"ACN5459","dest":"JOINVILLE","destCode":"JOI"}]}

@@ -1,1 +1,1 @@
-{"airport":"SWBC","iata":"BAZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-05","2026-11-06"],"departures":[{"t":1793973300000,"num":"ACN5316","dest":"MANAUS","destCode":"MAO"},{"t":1793991300000,"num":"ACN5319","dest":"MANAUS","destCode":"MAO"}]}
+{"airport":"SWBC","iata":"BAZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1793973300000,"num":"ACN5316","dest":"MANAUS","destCode":"MAO"},{"t":1793991300000,"num":"ACN5319","dest":"MANAUS","destCode":"MAO"}]}

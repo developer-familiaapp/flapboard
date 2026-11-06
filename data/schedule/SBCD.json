@@ -1,1 +1,1 @@
-{"airport":"SBCD","iata":"CFC","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-04","2026-11-05"],"departures":[]}
+{"airport":"SBCD","iata":"CFC","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1794061500000,"num":"ACN5457","dest":"FLORIANOPOLIS","destCode":"FLN"}]}

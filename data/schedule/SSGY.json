@@ -1,1 +1,1 @@
-{"airport":"SSGY","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-05","2026-11-06"],"departures":[]}
+{"airport":"SSGY","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1794061200000,"num":"ACN5418","dest":"CURITIBA","destCode":"CWB"}]}
