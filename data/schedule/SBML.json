@@ -1,1 +1,1 @@
-{"airport":"SBML","iata":"MII","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1794063000000,"num":"ACN5237","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBML","iata":"MII","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794063000000,"num":"ACN5237","dest":"CAMPINAS","destCode":"VCP"},{"t":1794149400000,"num":"ACN5237","dest":"CAMPINAS","destCode":"VCP"},{"t":1794174600000,"num":"AD4222","dest":"CAMPINAS","destCode":"VCP"}]}

@@ -1,1 +1,1 @@
-{"airport":"SBUG","iata":"URG","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[]}
+{"airport":"SBUG","iata":"URG","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794165900000,"num":"AD2996","dest":"PORTO ALEGRE","destCode":"POA"}]}
