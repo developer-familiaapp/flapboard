@@ -1,1 +1,1 @@
-{"airport":"SBJI","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1793989500000,"num":"AD2645","dest":"CUIABA","destCode":"CGB"},{"t":1794083100000,"num":"AD4681","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBJI","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-06","2026-11-07"],"departures":[{"t":1794083100000,"num":"AD4681","dest":"CAMPINAS","destCode":"VCP"}]}
