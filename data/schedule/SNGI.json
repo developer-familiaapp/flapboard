@@ -1,1 +1,1 @@
-{"airport":"SNGI","iata":"GNM","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794065400000,"num":"ACN5126","dest":"SALVADOR","destCode":"SSA"},{"t":1794151800000,"num":"ACN5126","dest":"SALVADOR","destCode":"SSA"}]}
+{"airport":"SNGI","iata":"GNM","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794151800000,"num":"ACN5126","dest":"SALVADOR","destCode":"SSA"}]}
