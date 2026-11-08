@@ -1,1 +1,1 @@
-{"airport":"SNJR","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794161700000,"num":"ACN5197","dest":"BELO HORIZONTE","destCode":"CNF"}]}
+{"airport":"SNJR","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-08","2026-11-09"],"departures":[{"t":1794161700000,"num":"ACN5197","dest":"BELO HORIZONTE","destCode":"CNF"},{"t":1794232500000,"num":"ACN5197","dest":"BELO HORIZONTE","destCode":"CNF"}]}
