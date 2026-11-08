@@ -1,1 +1,1 @@
-{"airport":"SSKW","iata":"OAL","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794075900000,"num":"AD2651","dest":"CUIABA","destCode":"CGB"},{"t":1794170700000,"num":"AD4791","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SSKW","iata":"OAL","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-07","2026-11-08"],"departures":[{"t":1794170700000,"num":"AD4791","dest":"CAMPINAS","destCode":"VCP"}]}
