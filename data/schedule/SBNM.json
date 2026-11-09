@@ -1,1 +1,1 @@
-{"airport":"SBNM","iata":"GEL","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-08","2026-11-09"],"departures":[{"t":1794237900000,"num":"AD2992","dest":"PORTO ALEGRE","destCode":"POA"},{"t":1794246900000,"num":"G32143","dest":"SAO PAULO","destCode":"CGH"}]}
+{"airport":"SBNM","iata":"GEL","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794237900000,"num":"AD2992","dest":"PORTO ALEGRE","destCode":"POA"},{"t":1794246900000,"num":"G32143","dest":"SAO PAULO","destCode":"CGH"}]}
