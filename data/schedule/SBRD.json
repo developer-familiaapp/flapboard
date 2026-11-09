@@ -1,1 +1,1 @@
-{"airport":"SBRD","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-08","2026-11-09"],"departures":[{"t":1794163500000,"num":"AD4347","dest":"CAMPINAS","destCode":"VCP"},{"t":1794249900000,"num":"AD4347","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBRD","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-08","2026-11-09"],"departures":[{"t":1794249900000,"num":"AD4347","dest":"CAMPINAS","destCode":"VCP"}]}
