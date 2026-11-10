@@ -1,1 +1,1 @@
-{"airport":"SBCN","iata":"CLV","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794343200000,"num":"LA4767","dest":"SAO PAULO","destCode":"GRU"}]}
+{"airport":"SBCN","iata":"CLV","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[{"t":1794343200000,"num":"LA4767","dest":"SAO PAULO","destCode":"GRU"},{"t":1794421200000,"num":"G31423","dest":"SAO PAULO","destCode":"CGH"}]}

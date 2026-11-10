@@ -1,1 +1,1 @@
-{"airport":"SBSJ","iata":"SJK","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-08","2026-11-09"],"departures":[]}
+{"airport":"SBSJ","iata":"SJK","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[{"t":1794435000000,"num":"G32117","dest":"RIO DE JANEIRO","destCode":"GIG"}]}

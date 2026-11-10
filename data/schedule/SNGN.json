@@ -1,1 +1,1 @@
-{"airport":"SNGN","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[]}
+{"airport":"SNGN","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[{"t":1794423900000,"num":"ACN5103","dest":"RECIFE","destCode":"REC"}]}
