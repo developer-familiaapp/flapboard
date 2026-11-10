@@ -1,1 +1,1 @@
-{"airport":"SBPO","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794249000000,"num":"AD2958","dest":"CURITIBA","destCode":"CWB"},{"t":1794333000000,"num":"AD4503","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBPO","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794333000000,"num":"AD4503","dest":"CAMPINAS","destCode":"VCP"}]}

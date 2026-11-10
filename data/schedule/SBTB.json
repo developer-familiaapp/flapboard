@@ -1,1 +1,1 @@
-{"airport":"SBTB","iata":"TMT","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794257400000,"num":"AD4418","dest":"MANAUS","destCode":"MAO"},{"t":1794343800000,"num":"AD4418","dest":"MANAUS","destCode":"MAO"}]}
+{"airport":"SBTB","iata":"TMT","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794343800000,"num":"AD4418","dest":"MANAUS","destCode":"MAO"}]}

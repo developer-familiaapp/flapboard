@@ -1,1 +1,1 @@
-{"airport":"SNCP","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[{"t":1794253200000,"num":"G32109","dest":"SAO PAULO","destCode":"CGH"},{"t":1794263400000,"num":"ACN5465","dest":"FLORIANOPOLIS","destCode":"FLN"}]}
+{"airport":"SNCP","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-09","2026-11-10"],"departures":[]}
