@@ -1,1 +1,1 @@
-{"airport":"SWBR","iata":"RBB","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[]}
+{"airport":"SWBR","iata":"RBB","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[{"t":1794514200000,"num":"ACN5317","dest":"MANAUS","destCode":"MAO"}]}

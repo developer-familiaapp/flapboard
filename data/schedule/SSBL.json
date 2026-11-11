@@ -1,1 +1,1 @@
-{"airport":"SSBL","iata":"BNU","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[]}
+{"airport":"SSBL","iata":"BNU","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[{"t":1794505800000,"num":"ACN5455","dest":"FLORIANOPOLIS","destCode":"FLN"}]}

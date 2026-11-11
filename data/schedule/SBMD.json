@@ -1,1 +1,1 @@
-{"airport":"SBMD","iata":"MEU","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[{"t":1794398400000,"num":"ACN5320","dest":"BREVES","destCode":"BVS"}]}
+{"airport":"SBMD","iata":"MEU","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[{"t":1794398400000,"num":"ACN5320","dest":"BREVES","destCode":"BVS"}]}

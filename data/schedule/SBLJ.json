@@ -1,1 +1,1 @@
-{"airport":"SBLJ","iata":"LAJ","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[{"t":1794420300000,"num":"ACN5461","dest":"FLORIANOPOLIS","destCode":"FLN"}]}
+{"airport":"SBLJ","iata":"LAJ","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[{"t":1794420300000,"num":"ACN5461","dest":"FLORIANOPOLIS","destCode":"FLN"}]}

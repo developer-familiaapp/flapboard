@@ -1,1 +1,1 @@
-{"airport":"SBPK","iata":"PET","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-10","2026-11-11"],"departures":[{"t":1794431400000,"num":"LA4745","dest":"SAO PAULO","destCode":"GRU"}]}
+{"airport":"SBPK","iata":"PET","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[{"t":1794431400000,"num":"LA4745","dest":"SAO PAULO","destCode":"GRU"},{"t":1794495900000,"num":"AD2953","dest":"PORTO ALEGRE","destCode":"POA"},{"t":1794510600000,"num":"G32135","dest":"SAO PAULO","destCode":"CGH"}]}
