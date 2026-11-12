@@ -1,1 +1,1 @@
-{"airport":"SBAX","iata":"AAX","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[]}
+{"airport":"SBAX","iata":"AAX","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-12","2026-11-13"],"departures":[{"t":1794579000000,"num":"ACN5131","dest":"BELO HORIZONTE","destCode":"CNF"}]}
