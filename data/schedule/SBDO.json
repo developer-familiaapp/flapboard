@@ -1,1 +1,1 @@
-{"airport":"SBDO","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-12","2026-11-13"],"departures":[{"t":1794579900000,"num":"LA3589","dest":"SAO PAULO","destCode":"GRU"}]}
+{"airport":"SBDO","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794579900000,"num":"LA3589","dest":"SAO PAULO","destCode":"GRU"},{"t":1794666900000,"num":"LA3589","dest":"SAO PAULO","destCode":"GRU"}]}

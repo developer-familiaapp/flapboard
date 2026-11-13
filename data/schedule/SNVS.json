@@ -1,1 +1,1 @@
-{"airport":"SNVS","iata":"BVS","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-11","2026-11-12"],"departures":[]}
+{"airport":"SNVS","iata":"BVS","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794662700000,"num":"ACN5861","dest":"BELEM","destCode":"BEL"}]}

@@ -1,1 +1,1 @@
-{"airport":"SBBW","iata":"BPG","tz":"America/Campo_Grande","source":"ANAC SIROS","days":["2026-11-12","2026-11-13"],"departures":[]}
+{"airport":"SBBW","iata":"BPG","tz":"America/Campo_Grande","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794670500000,"num":"ACN5341","dest":"CUIABA","destCode":"CGB"}]}

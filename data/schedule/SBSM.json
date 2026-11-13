@@ -1,1 +1,1 @@
-{"airport":"SBSM","iata":"RIA","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-12","2026-11-13"],"departures":[]}
+{"airport":"SBSM","iata":"RIA","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794680100000,"num":"AD2968","dest":"PORTO ALEGRE","destCode":"POA"}]}
