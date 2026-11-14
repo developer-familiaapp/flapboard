@@ -1,1 +1,1 @@
-{"airport":"SBUY","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794607200000,"num":"AD9588","dest":"MANAUS","destCode":"MAO"},{"t":1794667500000,"num":"AD9586","dest":"MANAUS","destCode":"MAO"}]}
+{"airport":"SBUY","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794667500000,"num":"AD9586","dest":"MANAUS","destCode":"MAO"}]}
