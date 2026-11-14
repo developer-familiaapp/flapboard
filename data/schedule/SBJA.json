@@ -1,1 +1,1 @@
-{"airport":"SBJA","iata":"JJG","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[]}
+{"airport":"SBJA","iata":"JJG","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-14","2026-11-15"],"departures":[{"t":1794700800000,"num":"PLS9004","dest":"SAO JOSE DO RIO PRETO","destCode":"SJP"},{"t":1794774900000,"num":"LA4771","dest":"SAO PAULO","destCode":"GRU"}]}

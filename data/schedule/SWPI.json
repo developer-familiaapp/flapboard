@@ -1,1 +1,1 @@
-{"airport":"SWPI","iata":"PIN","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[]}
+{"airport":"SWPI","iata":"PIN","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-14","2026-11-15"],"departures":[{"t":1794753600000,"num":"AD4245","dest":"MANAUS","destCode":"MAO"}]}

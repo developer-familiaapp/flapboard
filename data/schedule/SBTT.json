@@ -1,1 +1,1 @@
-{"airport":"SBTT","iata":"TBT","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[{"t":1794670200000,"num":"AD4183","dest":"TEFE","destCode":"TFF"}]}
+{"airport":"SBTT","iata":"TBT","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-14","2026-11-15"],"departures":[{"t":1794670200000,"num":"AD4183","dest":"TEFE","destCode":"TFF"},{"t":1794759900000,"num":"AD2683","dest":"MANAUS","destCode":"MAO"}]}
