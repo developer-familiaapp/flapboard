@@ -1,1 +1,1 @@
-{"airport":"SWLB","iata":"LBR","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-14","2026-11-15"],"departures":[]}
+{"airport":"SWLB","iata":"LBR","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794855000000,"num":"ACN5342","dest":"COARI","destCode":"CIZ"}]}

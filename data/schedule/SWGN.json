@@ -1,1 +1,1 @@
-{"airport":"SWGN","iata":"AUX","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-14","2026-11-15"],"departures":[]}
+{"airport":"SWGN","iata":"AUX","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794808200000,"num":"G32167","dest":"PALMAS","destCode":"PMW"}]}

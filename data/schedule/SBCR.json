@@ -1,1 +1,1 @@
-{"airport":"SBCR","iata":"CMG","tz":"America/Campo_Grande","source":"ANAC SIROS","days":["2026-11-13","2026-11-14"],"departures":[]}
+{"airport":"SBCR","iata":"CMG","tz":"America/Campo_Grande","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794838800000,"num":"AD2691","dest":"CAMPINAS","destCode":"VCP"}]}

@@ -1,1 +1,1 @@
-{"airport":"SBAE","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-14","2026-11-15"],"departures":[{"t":1794749100000,"num":"AD4540","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBAE","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794749100000,"num":"AD4540","dest":"CAMPINAS","destCode":"VCP"},{"t":1794835500000,"num":"AD4540","dest":"CAMPINAS","destCode":"VCP"}]}
