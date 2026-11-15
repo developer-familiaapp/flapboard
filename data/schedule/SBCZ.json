@@ -1,1 +1,1 @@
-{"airport":"SBCZ","iata":"CZS","tz":"America/Rio_Branco","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794764100000,"num":"G31759","dest":"RIO BRANCO","destCode":"RBR"},{"t":1794850500000,"num":"G31759","dest":"RIO BRANCO","destCode":"RBR"}]}
+{"airport":"SBCZ","iata":"CZS","tz":"America/Rio_Branco","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794850500000,"num":"G31759","dest":"RIO BRANCO","destCode":"RBR"}]}

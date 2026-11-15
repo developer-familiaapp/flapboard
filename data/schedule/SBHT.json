@@ -1,1 +1,1 @@
-{"airport":"SBHT","iata":"ATM","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794766200000,"num":"AD4463","dest":"BELEM","destCode":"BEL"},{"t":1794852600000,"num":"AD4463","dest":"BELEM","destCode":"BEL"}]}
+{"airport":"SBHT","iata":"ATM","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794852600000,"num":"AD4463","dest":"BELEM","destCode":"BEL"}]}
