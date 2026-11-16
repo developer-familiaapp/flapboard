@@ -1,1 +1,1 @@
-{"airport":"SBPK","iata":"PET","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[{"t":1794858300000,"num":"AD2833","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBPK","iata":"PET","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-16","2026-11-17"],"departures":[{"t":1794858300000,"num":"AD2833","dest":"CAMPINAS","destCode":"VCP"},{"t":1794927900000,"num":"AD2953","dest":"PORTO ALEGRE","destCode":"POA"},{"t":1794942600000,"num":"G32135","dest":"SAO PAULO","destCode":"CGH"}]}

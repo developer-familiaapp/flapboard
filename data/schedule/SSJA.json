@@ -1,1 +1,1 @@
-{"airport":"SSJA","iata":"JCB","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-12","2026-11-13"],"departures":[]}
+{"airport":"SSJA","iata":"JCB","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-16","2026-11-17"],"departures":[{"t":1794925500000,"num":"ACN5451","dest":"FLORIANOPOLIS","destCode":"FLN"}]}

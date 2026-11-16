@@ -1,1 +1,1 @@
-{"airport":"SSIM","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-12","2026-11-13"],"departures":[]}
+{"airport":"SSIM","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-16","2026-11-17"],"departures":[{"t":1794948300000,"num":"ACN5453","dest":"FLORIANOPOLIS","destCode":"FLN"}]}
