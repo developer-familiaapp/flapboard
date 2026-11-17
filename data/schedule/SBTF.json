@@ -1,1 +1,1 @@
-{"airport":"SBTF","iata":"TFF","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-17","2026-11-18"],"departures":[{"t":1794937500000,"num":"AD4183","dest":"MANAUS","destCode":"MAO"},{"t":1795010700000,"num":"AD2683","dest":"TABATINGA","destCode":"TBT"}]}
+{"airport":"SBTF","iata":"TFF","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-17","2026-11-18"],"departures":[{"t":1795010700000,"num":"AD2683","dest":"TABATINGA","destCode":"TBT"}]}
