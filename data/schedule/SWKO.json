@@ -1,1 +1,1 @@
-{"airport":"SWKO","iata":"CIZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-16","2026-11-17"],"departures":[{"t":1794853500000,"num":"ACN5321","dest":"CARAUARI","destCode":"CAF"},{"t":1794863400000,"num":"ACN5342","dest":"MANAUS","destCode":"MAO"}]}
+{"airport":"SWKO","iata":"CIZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-16","2026-11-17"],"departures":[]}
