@@ -1,1 +1,1 @@
-{"airport":"SNTS","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-16","2026-11-17"],"departures":[]}
+{"airport":"SNTS","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-17","2026-11-18"],"departures":[{"t":1795009500000,"num":"ACN5369","dest":"SJZA","destCode":"SJZA"}]}
