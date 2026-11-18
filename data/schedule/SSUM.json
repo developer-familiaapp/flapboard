@@ -1,1 +1,1 @@
-{"airport":"SSUM","iata":"UMU","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-17","2026-11-18"],"departures":[{"t":1795015500000,"num":"ACN5445","dest":"CURITIBA","destCode":"CWB"}]}
+{"airport":"SSUM","iata":"UMU","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-18","2026-11-19"],"departures":[{"t":1795015500000,"num":"ACN5445","dest":"CURITIBA","destCode":"CWB"}]}
