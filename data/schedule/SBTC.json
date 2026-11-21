@@ -1,1 +1,1 @@
-{"airport":"SBTC","iata":"UNA","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-15","2026-11-16"],"departures":[]}
+{"airport":"SBTC","iata":"UNA","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-21","2026-11-22"],"departures":[{"t":1795370400000,"num":"AD2457","dest":"BELO HORIZONTE","destCode":"CNF"},{"t":1795377300000,"num":"AD2465","dest":"SAO PAULO","destCode":"CGH"}]}
