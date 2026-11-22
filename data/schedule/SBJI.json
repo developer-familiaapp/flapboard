@@ -1,1 +1,1 @@
-{"airport":"SBJI","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-21","2026-11-22"],"departures":[]}
+{"airport":"SBJI","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-22","2026-11-23"],"departures":[{"t":1795458300000,"num":"AD2645","dest":"CUIABA","destCode":"CGB"}]}

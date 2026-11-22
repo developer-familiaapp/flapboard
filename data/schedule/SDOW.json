@@ -1,1 +1,1 @@
-{"airport":"SDOW","iata":"OIA","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-20","2026-11-21"],"departures":[]}
+{"airport":"SDOW","iata":"OIA","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-22","2026-11-23"],"departures":[{"t":1795464600000,"num":"ACN5108","dest":"BELEM","destCode":"BEL"}]}
