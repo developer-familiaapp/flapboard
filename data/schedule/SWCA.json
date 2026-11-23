@@ -1,1 +1,1 @@
-{"airport":"SWCA","iata":"CAF","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-20","2026-11-21"],"departures":[]}
+{"airport":"SWCA","iata":"CAF","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-23","2026-11-24"],"departures":[{"t":1795527900000,"num":"ACN5951","dest":"SBUY","destCode":"SBUY"},{"t":1795539000000,"num":"ACN5953","dest":"SBUY","destCode":"SBUY"},{"t":1795548900000,"num":"ACN5955","dest":"SBUY","destCode":"SBUY"}]}
