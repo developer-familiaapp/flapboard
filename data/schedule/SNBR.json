@@ -1,1 +1,1 @@
-{"airport":"SNBR","iata":"BRA","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-24","2026-11-25"],"departures":[{"t":1795549200000,"num":"AD4156","dest":"BELO HORIZONTE","destCode":"CNF"},{"t":1795636800000,"num":"AD4156","dest":"BELO HORIZONTE","destCode":"CNF"}]}
+{"airport":"SNBR","iata":"BRA","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-24","2026-11-25"],"departures":[{"t":1795636800000,"num":"AD4156","dest":"BELO HORIZONTE","destCode":"CNF"}]}
