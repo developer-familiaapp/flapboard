@@ -1,1 +1,1 @@
-{"airport":"SBPB","iata":"PHB","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-24","2026-11-25"],"departures":[{"t":1795635000000,"num":"AD2950","dest":"TERESINA","destCode":"THE"}]}
+{"airport":"SBPB","iata":"PHB","tz":"America/Fortaleza","source":"ANAC SIROS","days":["2026-11-25","2026-11-26"],"departures":[{"t":1795635000000,"num":"AD2950","dest":"TERESINA","destCode":"THE"},{"t":1795702800000,"num":"LA3559","dest":"FORTALEZA","destCode":"FOR"}]}

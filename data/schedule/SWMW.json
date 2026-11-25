@@ -1,1 +1,1 @@
-{"airport":"SWMW","iata":"MBZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-24","2026-11-25"],"departures":[]}
+{"airport":"SWMW","iata":"MBZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-25","2026-11-26"],"departures":[{"t":1795717800000,"num":"ACN5317","dest":"BORBA","destCode":"RBB"}]}

@@ -1,1 +1,1 @@
-{"airport":"SNHS","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-24","2026-11-25"],"departures":[]}
+{"airport":"SNHS","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-25","2026-11-26"],"departures":[{"t":1795701900000,"num":"ACN5362","dest":"SNAB","destCode":"SNAB"}]}

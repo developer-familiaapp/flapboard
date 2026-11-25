@@ -1,1 +1,1 @@
-{"airport":"SSUV","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-24","2026-11-25"],"departures":[]}
+{"airport":"SSUV","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-25","2026-11-26"],"departures":[{"t":1795719300000,"num":"ACN5446","dest":"CURITIBA","destCode":"CWB"}]}
