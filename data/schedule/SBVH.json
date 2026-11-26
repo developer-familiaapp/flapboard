@@ -1,1 +1,1 @@
-{"airport":"SBVH","iata":"BVH","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-25","2026-11-26"],"departures":[{"t":1795716300000,"num":"AD2639","dest":"CUIABA","destCode":"CGB"}]}
+{"airport":"SBVH","iata":"BVH","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-26","2026-11-27"],"departures":[{"t":1795716300000,"num":"AD2639","dest":"CUIABA","destCode":"CGB"},{"t":1795811700000,"num":"AD4809","dest":"CAMPINAS","destCode":"VCP"}]}

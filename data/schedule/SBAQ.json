@@ -1,1 +1,1 @@
-{"airport":"SBAQ","iata":"AQA","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-25","2026-11-26"],"departures":[]}
+{"airport":"SBAQ","iata":"AQA","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-26","2026-11-27"],"departures":[{"t":1795807800000,"num":"ACN5199","dest":"CAMPINAS","destCode":"VCP"}]}

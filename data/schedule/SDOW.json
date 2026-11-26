@@ -1,1 +1,1 @@
-{"airport":"SDOW","iata":"OIA","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-23","2026-11-24"],"departures":[]}
+{"airport":"SDOW","iata":"OIA","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-26","2026-11-27"],"departures":[{"t":1795784400000,"num":"ACN5108","dest":"PARAUAPEBAS","destCode":"CKS"}]}
