@@ -1,1 +1,1 @@
-{"airport":"SWKO","iata":"CIZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-27","2026-11-28"],"departures":[{"t":1795795500000,"num":"ACN5324","dest":"MANAUS","destCode":"MAO"},{"t":1795883400000,"num":"ACN5342","dest":"MANAUS","destCode":"MAO"}]}
+{"airport":"SWKO","iata":"CIZ","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-27","2026-11-28"],"departures":[{"t":1795883400000,"num":"ACN5342","dest":"MANAUS","destCode":"MAO"}]}
