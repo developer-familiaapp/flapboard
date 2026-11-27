@@ -1,1 +1,1 @@
-{"airport":"SBIH","iata":"ITB","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-26","2026-11-27"],"departures":[]}
+{"airport":"SBIH","iata":"ITB","tz":"America/Belem","source":"ANAC SIROS","days":["2026-11-27","2026-11-28"],"departures":[{"t":1795875000000,"num":"AD4354","dest":"MANAUS","destCode":"MAO"}]}

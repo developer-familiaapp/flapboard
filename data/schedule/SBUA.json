@@ -1,1 +1,1 @@
-{"airport":"SBUA","iata":"SJL","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-26","2026-11-27"],"departures":[]}
+{"airport":"SBUA","iata":"SJL","tz":"America/Boa_Vista","source":"ANAC SIROS","days":["2026-11-27","2026-11-28"],"departures":[{"t":1795895700000,"num":"AD4775","dest":"MANAUS","destCode":"MAO"}]}
