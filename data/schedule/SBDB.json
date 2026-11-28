@@ -1,1 +1,1 @@
-{"airport":"SBDB","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-27","2026-11-28"],"departures":[{"t":1795887300000,"num":"G32107","dest":"SAO PAULO","destCode":"CGH"}]}
+{"airport":"SBDB","iata":"","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-28","2026-11-29"],"departures":[{"t":1795887300000,"num":"G32107","dest":"SAO PAULO","destCode":"CGH"},{"t":1795960800000,"num":"AD2491","dest":"CAMPINAS","destCode":"VCP"},{"t":1795964700000,"num":"LA3695","dest":"SAO PAULO","destCode":"GRU"}]}

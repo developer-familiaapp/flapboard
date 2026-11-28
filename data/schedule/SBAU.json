@@ -1,1 +1,1 @@
-{"airport":"SBAU","iata":"ARU","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-27","2026-11-28"],"departures":[{"t":1795873200000,"num":"AD4154","dest":"CAMPINAS","destCode":"VCP"}]}
+{"airport":"SBAU","iata":"ARU","tz":"America/Sao_Paulo","source":"ANAC SIROS","days":["2026-11-28","2026-11-29"],"departures":[{"t":1795873200000,"num":"AD4154","dest":"CAMPINAS","destCode":"VCP"},{"t":1795959600000,"num":"AD4154","dest":"CAMPINAS","destCode":"VCP"},{"t":1795974900000,"num":"G31101","dest":"SAO PAULO","destCode":"CGH"}]}
